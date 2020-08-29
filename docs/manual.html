@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
+  <title>Simple Motion Tracker</title>
+
+  <!-- CSS  -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="css/materialize.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+  <link href="css/style.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+</head>
+<body>
+  <nav class="pink darken-3 lighten-1" role="navigation">
+    <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo">Simple Motion Tracker</a>
+      <ul class="right hide-on-med-and-down">
+        <li><a href="index.html">ホーム</a></li>
+        <li><a target="_blank" href="https://yuki-natsuno-vt.booth.pm/">ダウンロード</a></li>
+        <li><a href="manual.html">説明</a></li>
+      </ul>
+
+      <ul id="nav-mobile" class="sidenav">
+        <li><a href="index.html">ホーム</a></li>
+        <li><a target="_blank" href="https://yuki-natsuno-vt.booth.pm/">ダウンロード</a></li>
+        <li><a href="manual.html">説明</a></li>
+      </ul>
+      <a href="#" data-target="nav-mobile" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+    </div>
+  </nav>
+  <div class="section no-pad-bot" id="index-banner">
+    <div class="container">
+      <br><br>
+      <h1 class="pink-text text-darken-3">説明</h1>
+      <h5>目次</h5>
+      <div class="indent">
+        <h6>・<a class="pink-text text-darken-3" href="#merit">メリット</a></h6>
+        <h6>・<a class="pink-text text-darken-3" href="#getstart">すぐに始める</a></h6>
+        <h6>・<a class="pink-text text-darken-3" href="#detail">画面詳細</a></h6>
+      </div>
+    </div>
+  </div>
+  <br>
+  <br>
+  <div class="container">
+    <h5 id="merit">メリット</h5>
+    <div class="indent">
+      <p>Simple Motion Tracker（以後SMT）を使うメリットは、バーチャルモーションキャプチャー（以後VMC）とVMCの周辺ツールの恩恵を受けられることです。</p>
+      <p>すでにVR機器でVMCやEVMC4Uを使いリッチな絵作りをされている方は、VR機器をSMTに置き換えるだけでクオリティを維持しつつWebカメラでの気軽な撮影や配信が可能になります。</p>
+      <p>始めてVMCを利用される方は、SMTを使いVMCでの撮影や配信環境を整えておくことで、将来的にVR機器導入した際には、SMTをVR機器に置き換えるだけで移行が行えます。</p>
+    </div>
+  </div>
+  <br>
+  <br>
+  <div class="container">
+    <h5 id="getstart">すぐに始める</h5>
+    <div class="indent">
+      <h6>１．アプリケーションの入手</h6>
+      <div class="indent">
+        <p><a class="pink-text text-darken-3" target="_blank" href="https://yuki-natsuno-vt.booth.pm/">Simple Motion Traker</a> と <a class="pink-text text-darken-3" target="_blank" href="https://sh-akira.github.io/VirtualMotionCapture/">Virtual Motion Capture</a> ダウンロードします。</p>
+      </div>
+      <br>
+      <h6>２．Simple Motion Trakerの起動と設定</h6>
+      <div class="indent">
+        <img class="responsive-img" src="img/manual002.png">
+        <p>①<strong class="blue-grey lighten-4">ドロップダウンメニュー</strong>からカメラを選択する（※既知の不具合、仮想カメラがあると異なるカメラが選ばれることがある）</p>
+        <p>②<strong class="blue-grey lighten-4">Start</strong>を押す（カメラが起動したか確認したい場合は画面下部の Show Capture Imageにチェックを入れる）</p>
+        <p>③<strong class="blue-grey lighten-4">Use Face Tracking</strong>にチェックを入れる</p>
+        <p>④<strong class="blue-grey lighten-4">Calibrate Face Points</strong>を押す</p>
+        <p>⑤<strong class="blue-grey lighten-4">Force T Pose</strong>にチェックを入れる</p>
+      </div>
+      <br>
+      <h6>３．Virtual Motion Captureの起動と設定</h6>
+      <div class="indent">
+        <img class="responsive-img" src="img/manual003.png">
+        <p>①<strong class="blue-grey lighten-4">詳細設定</strong>を開く</p>
+        <p>②<strong class="blue-grey lighten-4">OSCでモーション受信を有効にする</strong>にチェックを入れる</p>
+        <p>③<strong class="blue-grey lighten-4">トラッカー割り当て設定を開く</strong>を押す</p>
+        <p>④<strong class="blue-grey lighten-4">トラッカー一覧</strong>に以下の仮想トラッカーが表示されていることを確認する<br>
+        <div class="indent">
+          <ul>
+            <li>・VD_SMT_HEAD<li>
+            <li>・VD_SMT_LEFT_HAND<li>
+            <li>・VD_SMT_RIGHT_HAND<li>
+          </ul>
+        </div>
+        </p>
+        <p>⑤<strong class="blue-grey lighten-4">トラッカー割り当て</strong>で頭、左手、右手に仮想トラッカーを割り当てる</p>
+        <p>トラッカー割り当て設定、設定のウインドウを閉じる</p>
+      </div>
+      <br>
+      <h6>４．アバターの読み込みとキャリブレーション</h6>
+      <div class="indent">
+        <img class="responsive-img" src="img/manual004.png">
+        <p>①<strong class="blue-grey lighten-4">VRM読込</strong>から[VRM読み込み]→[ファイルを選択]→[同意して読み込み]でアバターをロードする</p>
+        <p>②<strong class="blue-grey lighten-4">キャリブレーション</strong>を開く</p>
+        <p>③モードを選び<strong class="blue-grey lighten-4">キャリブレーション</strong>を実行する</p>
+      </div>
+      <br>
+      <br>
+      <h6>５．トラッキングスタート！</h6>
+      <div class="indent">
+        <img class="responsive-img" src="img/manual005.png">
+        <p>SMTの<strong class="blue-grey lighten-4">Force T Pose</strong>のチェックを外すとTポーズが解除され、顔の動きに合わせてVMC上のアバターが動きます</p>
+      </div>
+      <br>
+    </div>
+  </div>
+  
+  <br>
+  <br>
+  <div class="container">
+    <h5 id="detail">画面詳細</h5>
+    <div class="indent">
+      <h6>各パラメータの解説</h6>
+      <div class="indent">
+        <h7>Foce T Pose</h7>
+        <div class="indent">
+          VMCでのキャリブレーション用にTポーズを取ります
+        </div>
+        <br>
+        <h7>Use Face Tracking</h7>
+        <div class="indent">
+          顏認識による追跡モードを有効にします
+        </div>
+        <br>
+        <h7>Face Angle Base Distance</h7>
+        <div class="indent">
+          真横を向いたと判定されるまでの距離です。（単位はメートル、デフォルトは0.2）
+        </div>
+        <br>
+        <h7>Translation Magnification</h7>
+        <div class="indent">
+          平行移動量の倍率です。値を大きくすると少しの頭の動きでアバターを大きく移動させることが出来ます（デフォルトは1.0）
+        </div>
+        <br>
+        <h7>Rotation Magnification</h7>
+        <div class="indent">
+          回転量の倍率です。値を大きくすると少しの頭の動きでアバターを大きく回転させることが出来ます（デフォルトは1.0）
+        </div>
+        <br>
+        <h7>Calibrate Face Points</h7>
+        <div class="indent">
+          顏の中央位置、奥行きの最背面の位置確定させます。この座標をもとに顏の傾きや前後を検出します。また、この位置より奥へは移動できません。<br>
+          ※後述のAuto adjustmentにより補正されます。
+        </div>
+        <br>
+        <h7>Smoothing Level</h7>
+        <div class="indent">
+          検出誤差を抑えるために指定フレーム間の平均値を取ります。値が小さいとクイックに反応しますが、ブレが大きくなります。値が大きいとブレは少ないですが反応が遅くなります。（デフォルトは10）
+        </div>
+        <br>
+        <h7>Auto Adjustment</h7>
+        <div class="indent">
+          Calibrate Face Pointsで行った顏の中央位置を、現在の顏の位置に徐々に補正する割合を指定します。（自動で正面を向き直す）<br>
+          値は0.0～1.0の間で指定してください。0を指定すると無効になります。（デフォルトは0.05）
+        </div>
+        <br>
+        <h7>Select Video Device</h7>
+        <div class="indent">
+          カメラの選択です。カメラを変更すると動いていたカメラが停止します<br>
+          ※既知の不具合。仮想カメラがあると（特にFaceRigが怪しい）指定したカメラが選ばれないので上から順に試してもらう必要があります。
+        </div>
+        <br>
+        <h7>Start</h7>
+        <div class="indent">
+          選択したカメラに切り替えます。押した後は表示がStartからRunningに切り替わります
+        </div>
+        <br>
+        <h7>Port</h7>
+        <div class="indent">
+          仮想トラッカー情報をVMCへ送るためのポート番号です
+        </div>
+        <br>
+        <h7>Show Capture Image</h7>
+        <div class="indent">
+          カメラで撮影中の現実が表示されます。カメラで撮影できているかの確認や顏の検出状況の確認が出来ます
+        </div>
+      </div>
+      <br>
+    </div>
+  </div>
+  
+  <br>
+  <br>
+  <footer class="page-footer pink darken-3">
+    <div class="container">
+      <div class="row">
+        <div class="col l5 s12">
+          <h5 class="white-text">クリエイター</h5>
+          <p class="grey-text text-lighten-4">「あなたの未来をアップデート！」をキャッチフレーズに活動するバーチャルYoutuber夏乃ユウキ。見てくれたみんなの未来や可能性が広がるようなチャンネルを目指して色々な講座動画を投稿しています。</p>
+
+
+        </div>
+        <div class="col l4 s12">
+          <h5 class="white-text">Simple Motion Tracker</h5>
+          <ul>
+            <li><a class="white-text" target="_blank" href="https://yuki-natsuno-vt.booth.pm/">ダウンロード</a></li>
+            <li><a class="white-text" target="_blank"  href="https://github.com/yuki-natsuno-vt/SimpleMotionTraker">ソースコード</a></li>
+            <li><a class="white-text" href="license.html">ライセンス</a></li>
+          </ul>
+        </div>
+        <div class="col l3 s12">
+          <h5 class="white-text">夏乃ユウキ</h5>
+          <ul>
+            <li><a class="white-text" target="_blank" href="https://www.youtube.com/channel/UCkve7YZsw5Z7tuTM-HJ1YSQ">Youtube</a></li>
+            <li><a class="white-text" target="_blank" href="https://twitter.com/yuki_natsuno_vt">Twitter</a></li>
+            <li><a class="white-text" target="_blank" href="https://github.com/yuki-natsuno-vt">GitHub</a></li>
+            <li><a class="white-text" target="_blank" href="https://t.co/NjKHYXhQ5i">Amazon</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-copyright">
+      <div class="container">
+      Made by <a class="orange-text text-lighten-3" href="http://materializecss.com">Materialize</a>
+      <span style="text-align: right; float: right">
+        © 2020 <a href="https://twitter.com/yuki_natsuno_vt" class="orange-text text-lighten-3">夏乃ユウキ</a>
+      </span>
+      </div>
+    </div>
+  </footer>
+
+
+  <!--  Scripts-->
+  <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="js/materialize.js"></script>
+  <script src="js/init.js"></script>
+
+  </body>
+</html>
