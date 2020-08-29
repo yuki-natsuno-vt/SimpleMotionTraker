@@ -1,3 +1,56 @@
+
+※注意
+ライセンスは本ソフトウェア固有の部分と依存ライブラリにより異なります。
+コードの再利用、再配布の際は依存ライブラリのライセンスを確認の上行ってください。
+
+本ソフトウェアのライセンスは最下部に記載しています。
+
+-目次
+--3rd party license
+---OpenCV
+---OpenCV Contrib ArUco
+---OpenCVDeviceEnumerator
+---UniVRM
+---uOSC
+--Simple Motion Tracker License
+
+
+*******************************************************************************
+OpenCV
+https://github.com/opencv/opencv/blob/master/LICENSE
+Apache License
+Version 2.0, January 2004
+http://www.apache.org/licenses/
+
+
+*******************************************************************************
+https://github.com/opencv/opencv_contrib/blob/master/LICENSE
+OpenCV Contrib
+Apache License
+Version 2.0, January 2004
+http://www.apache.org/licenses/
+
+
+*******************************************************************************
+OpenCVDeviceEnumerator
+https://github.com/studiosi/OpenCVDeviceEnumerator/blob/master/LICENSE
+MIT License
+
+
+*******************************************************************************
+UniVRM
+https://github.com/vrm-c/UniVRM/blob/master/LICENSE.txt
+MIT License
+
+
+*******************************************************************************
+uOSC
+https://github.com/hecomi/uOSC
+MIT License
+
+
+*******************************************************************************
+Simple Motion Tracker
 MIT License
 
 Copyright (c) 2020 yuki-natsuno-vt
@@ -19,3 +72,5 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+
