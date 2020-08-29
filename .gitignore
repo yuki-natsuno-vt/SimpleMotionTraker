@@ -1,2 +1,5 @@
 .vs/
 Library/
+Assets/uOSC*
+Assets/VRM*
+UnityPackageManager/
