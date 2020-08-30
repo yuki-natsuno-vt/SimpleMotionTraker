@@ -6,7 +6,7 @@
 カメラのみのでアバターの操作を可能にします。
 
 # ダウンロード
-[SimpleMotionTracker公式サイト]()のダウンロードページを確認してください。  
+[SimpleMotionTracker公式サイト](https://yuki-natsuno-vt.github.io/SimpleMotionTraker/)のダウンロードページを確認してください。  
 
 # 更新履歴
 Ver 0.1  
