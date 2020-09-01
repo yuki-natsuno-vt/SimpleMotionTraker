@@ -83,7 +83,7 @@ public class TrackerSender : MonoBehaviour {
             }
         }
 
-        {
+        if(!String.IsNullOrEmpty(BlendShapeName)) {
             client.Send("/VMC/Ext/Blend/Val", BlendShapeName, BlendShapeValue);
             client.Send("/VMC/Ext/Blend/Apply");
         }
