@@ -1,6 +1,11 @@
 using System.Runtime.InteropServices;
+using System.Diagnostics;
+using System.IO;
 using System.Text;
 using UnityEngine;
+
+
+//using System.Windows.Forms;
 
 public class SMT
 {
@@ -40,12 +45,8 @@ public class SMT
     private static extern void SMT_setIrisThresh(int thresh);
     [DllImport("SimpleMotionTracker")]
     private static extern int SMT_getErrorCode();
-    [DllImport("SimpleMotionTracker", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
-    private static extern bool SMT_getOpenFileName(StringBuilder outFilePath, int size);
-    [DllImport("SimpleMotionTracker", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
-    private static extern bool SMT_getSaveFileName(StringBuilder outFilePath, int size);
 
-    public static bool isDebug = true;
+    public static bool isDebug = false;
 
     public static void init(string videoDeviceName) {
         SMT_init(videoDeviceName);
@@ -147,25 +148,29 @@ public class SMT
     // Unityのエディタ上で実行すると作業ディレクトリが変更された、のようなエラーメッセージが出て強制終了する
     // ビルド済みのexeの場合は問題ない.
     public static string getOpenFileName() {
-        if (isDebug) {
-            return "G:/test.cfg";
-        }
-        StringBuilder sb = new StringBuilder(260 * 4);
-        if (SMT_getOpenFileName(sb, sb.Capacity)) {
-            return sb.ToString();
-        }
-        return "";
+        var workDir = System.IO.Directory.GetCurrentDirectory();
+
+        ProcessStartInfo pInfo = new ProcessStartInfo();
+        pInfo.FileName = workDir + "/SelectFile.exe";
+        pInfo.Arguments = "-l \"Open Files\" \"Config files(*.cfg)\\0 *.cfg\\0All files(*.*)\\0 *.*\\0\\0\" \"cfg\"";
+        Process p = Process.Start(pInfo);
+        p.WaitForExit();
+
+        var fileName = File.ReadAllText("temp_path");
+        return fileName;
     }
 
     public static string getSaveFileName() {
-        if (isDebug) {
-            return "G:/test.cfg";
-        }
-        StringBuilder sb = new StringBuilder(260 * 4);
-        if (SMT_getSaveFileName(sb, sb.Capacity)) {
-            return sb.ToString();
-        }
-        return "";
+        var workDir = System.IO.Directory.GetCurrentDirectory();
+
+        ProcessStartInfo pInfo = new ProcessStartInfo();
+        pInfo.FileName = workDir + "/SelectFile.exe";
+        pInfo.Arguments = "-s \"Save Files\" \"Config files(*.cfg)\\0 *.cfg\\0All files(*.*)\\0 *.*\\0\\0\" \"cfg\"";
+        Process p = Process.Start(pInfo);
+        p.WaitForExit();
+
+        var fileName = File.ReadAllText("temp_path");
+        return fileName;
     }
 };
 

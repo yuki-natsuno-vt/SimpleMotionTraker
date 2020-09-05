@@ -271,10 +271,9 @@ public class MainCaera : MonoBehaviour {
 
     public void OnClickSave() {
         var fileName = SMT.getSaveFileName();
-        if (!fileName.Contains(".cfg")) {
-            fileName += ".cfg";
+        if (string.IsNullOrEmpty(fileName)) {
+            return;
         }
-
         var p = new Parameter();
         p.deviceName = _deviceName;
         p.isForcedTPose = _isForcedTPose;
@@ -305,6 +304,9 @@ public class MainCaera : MonoBehaviour {
 
     public void OnClickLoad() {
         var fileName = SMT.getOpenFileName();
+        if (string.IsNullOrEmpty(fileName)) {
+            return;
+        }
         string json = File.ReadAllText(fileName);
         Parameter p = JsonUtility.FromJson<Parameter>(json);
 
