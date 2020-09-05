@@ -46,6 +46,13 @@ public class TrackerSender : MonoBehaviour {
         client.enabled = true;
     }
 
+    public void setClientEnabled(bool isEnabled) {
+        if (client == null) {
+            return;
+        }
+        client.enabled = isEnabled;
+    }
+
     void Start() {
         client = GetComponent<uOSC.uOscClient>();
     }

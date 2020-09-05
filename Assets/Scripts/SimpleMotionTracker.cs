@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Text;
 using UnityEngine;
 
 public class SMT
@@ -36,10 +37,17 @@ public class SMT
     [DllImport("SimpleMotionTracker")]
     private static extern void SMT_getFacePoints(System.IntPtr outArray);
     [DllImport("SimpleMotionTracker")]
+    private static extern void SMT_setIrisThresh(int thresh);
+    [DllImport("SimpleMotionTracker")]
     private static extern int SMT_getErrorCode();
+    [DllImport("SimpleMotionTracker", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+    private static extern bool SMT_getOpenFileName(StringBuilder outFilePath, int size);
+    [DllImport("SimpleMotionTracker", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+    private static extern bool SMT_getSaveFileName(StringBuilder outFilePath, int size);
+
+    public static bool isDebug = true;
 
     public static void init(string videoDeviceName) {
-
         SMT_init(videoDeviceName);
     }
 
@@ -128,9 +136,36 @@ public class SMT
         rightIris = new Vector3(points[12], points[13], points[14]);
     }
 
+    public static void setIrisThresh(int thresh) {
+        SMT_setIrisThresh(thresh);
+    }
 
     public static int getErrorCode() {
         return SMT_getErrorCode();
+    }
+
+    // Unityのエディタ上で実行すると作業ディレクトリが変更された、のようなエラーメッセージが出て強制終了する
+    // ビルド済みのexeの場合は問題ない.
+    public static string getOpenFileName() {
+        if (isDebug) {
+            return "G:/test.cfg";
+        }
+        StringBuilder sb = new StringBuilder(260 * 4);
+        if (SMT_getOpenFileName(sb, sb.Capacity)) {
+            return sb.ToString();
+        }
+        return "";
+    }
+
+    public static string getSaveFileName() {
+        if (isDebug) {
+            return "G:/test.cfg";
+        }
+        StringBuilder sb = new StringBuilder(260 * 4);
+        if (SMT_getSaveFileName(sb, sb.Capacity)) {
+            return sb.ToString();
+        }
+        return "";
     }
 };
 
