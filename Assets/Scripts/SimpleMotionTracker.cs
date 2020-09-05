@@ -104,12 +104,18 @@ public class SMT
     }
 
     /// <summary>
-    /// 画面上の顏の中心、左目、右目位置を取得
+    /// 画面上の顏の中心、左目、右目、左虹彩、右虹彩 位置を取得
     /// z要素は半径
     /// </summary>
-    public static void getFacePoints(out Vector3 face, out Vector3 leftEye, out Vector3 rightEye) {
-        int length = 9;
-        float[] points = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    public static void getFacePoints(out Vector3 face, out Vector3 leftEye, out Vector3 rightEye, out Vector3 leftIris, out Vector3 rightIris) {
+        int length = 15;
+        float[] points = {
+            0, 0, 0, // 頭
+            0, 0, 0, // 左目
+            0, 0, 0, // 右目
+            0, 0, 0, // 左虹彩
+            0, 0, 0, // 右虹彩
+        };
 
         System.IntPtr ptr = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(float)) * length);
         SMT_getFacePoints(ptr);
@@ -118,6 +124,8 @@ public class SMT
         face = new Vector3(points[0], points[1], points[2]);
         leftEye = new Vector3(points[3], points[4], points[5]);
         rightEye = new Vector3(points[6], points[7], points[8]);
+        leftIris = new Vector3(points[9], points[10], points[11]);
+        rightIris = new Vector3(points[12], points[13], points[14]);
     }
 
 

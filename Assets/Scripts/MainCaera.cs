@@ -9,6 +9,9 @@ public class MainCaera : MonoBehaviour {
     [SerializeField] GameObject _head;
     [SerializeField] GameObject _leftHand;
     [SerializeField] GameObject _rightHand;
+    [SerializeField] GameObject _leftIris;
+    [SerializeField] GameObject _rightIris;
+    [SerializeField] GameObject _lookAt;
     [SerializeField] InputField _uOSCInputField;
     [SerializeField] InputField _faceAngleBaseDistanceInputField;
     [SerializeField] InputField _translationMagnificationInputField;
@@ -51,6 +54,20 @@ public class MainCaera : MonoBehaviour {
     float _autoAdjustmentRatio = 0.0f;
 
 
+    bool _useEyesLRBlinkSynced = true;
+    float _maxEyeOpenThreshold = 0.41f;
+    float _minEyeOpenThreshold = 0.3f;
+    float _irisTranslationScale = 2.0f;
+
+    const int MAX_EYE_SMOOTHING = 20;
+    List<Vector3> _leftEyeList;
+    List<Vector3> _rightEyeList;
+
+    const int MAX_IRIS_SMOOTHING = 5;
+    List<Vector3> _leftIrisList;
+    List<Vector3> _rightIrisList;
+
+
     public void OnChangeVideoDeviceList() {
         SMT.destroy();
         _cameraStartButtonText.text = "Start";
@@ -71,6 +88,8 @@ public class MainCaera : MonoBehaviour {
         _head.GetComponent<TrackerSender>().ChangePort(port);
         _leftHand.GetComponent<TrackerSender>().ChangePort(port);
         _rightHand.GetComponent<TrackerSender>().ChangePort(port);
+        _leftIris.GetComponent<TrackerSender>().ChangePort(port);
+        _rightIris.GetComponent<TrackerSender>().ChangePort(port);
     }
 
     public void OnChangeCaptureShown() {
@@ -135,7 +154,9 @@ public class MainCaera : MonoBehaviour {
         Vector3 face;
         Vector3 leftEye;
         Vector3 rightEye;
-        SMT.getFacePoints(out face, out leftEye, out rightEye);
+        Vector3 leftIris;
+        Vector3 rightIris;
+        SMT.getFacePoints(out face, out leftEye, out rightEye, out leftIris, out rightIris);
 
         _calibratedFacePosition = face;
         _calibratedLeftEyePosition = leftEye;
@@ -151,7 +172,6 @@ public class MainCaera : MonoBehaviour {
     }
 
     void smoothTransform(ref Vector3 t, ref Vector3 r) {
-
         _facePositionList.RemoveAt(_facePositionList.Count - 1);
         _facePositionList.Insert(0, t);
 
@@ -166,6 +186,17 @@ public class MainCaera : MonoBehaviour {
         }
         t = t / _smoothingLevel;
         r = r / _smoothingLevel;
+    }
+
+    void smooth(ref Vector3 t, ref List<Vector3> list, int length) {
+        list.RemoveAt(list.Count - 1);
+        list.Insert(0, t);
+
+        t.Set(0, 0, 0);
+        for (int i = 0; i < length; i++) {
+            t = t + list[i];
+        }
+        t = t / length;
     }
 
     // Use this for initialization
@@ -210,6 +241,20 @@ public class MainCaera : MonoBehaviour {
         for (int i = 0; i < MAX_SMOOTHING_LEVEL; i++) {
             _facePositionList.Add(Vector3.zero);
             _faceRotationList.Add(Vector3.zero);
+        }
+
+        _leftIrisList = new List<Vector3>();
+        _rightIrisList = new List<Vector3>();
+        for (int i = 0; i < MAX_IRIS_SMOOTHING; i++) {
+            _leftIrisList.Add(Vector3.zero);
+            _rightIrisList.Add(Vector3.zero);
+        }
+
+        _leftEyeList = new List<Vector3>();
+        _rightEyeList = new List<Vector3>();
+        for (int i = 0; i < MAX_EYE_SMOOTHING; i++) {
+            _leftEyeList.Add(Vector3.zero);
+            _rightEyeList.Add(Vector3.zero);
         }
     }
 
@@ -317,12 +362,54 @@ public class MainCaera : MonoBehaviour {
         _rightHand.transform.rotation = headRotation * Quaternion.Euler(-25, -45, 67);
     }
 
+    void trackingEyes(Vector3 eye, List<Vector3> eyeList, 
+                      Vector3 iris, List<Vector3> irisList, 
+                      GameObject go, float headRotationZ, out Vector3 lookAt) {
+        // 目の開閉を計算
+        smooth(ref eye, ref eyeList, MAX_EYE_SMOOTHING);
+        smooth(ref iris, ref irisList, MAX_IRIS_SMOOTHING);
+        float open = iris.z;
+        open = Mathf.Clamp(open, 0, 1.0f);
+        if (open > _maxEyeOpenThreshold) {
+            open = _maxEyeOpenThreshold;
+        }
+        else if (open < _minEyeOpenThreshold) {
+            open = _minEyeOpenThreshold;
+        }
+        open -= _minEyeOpenThreshold;
+        open = open / (_maxEyeOpenThreshold - _minEyeOpenThreshold);
+        go.transform.localScale = new Vector3(1, 1, open);
+        go.GetComponent<TrackerSender>().BlendShapeValue = 1.0f - open;
+
+        // 虹彩の移動量と注視点を計算
+        lookAt = Vector3.zero;
+        if (open > 0) {
+            // 目の中心から虹彩に向けたベクトル
+            var dir = iris - eye;
+            dir.z = 0;
+            // 頭の回転分だけ補正
+            dir = Quaternion.Euler(0, 0, headRotationZ) * dir;
+            // 目の範囲内でどれくらい移動しているか
+            var movingRatio = dir.magnitude / eye.z;
+            movingRatio = Mathf.Clamp(movingRatio, -1, 1);
+            // 向きベクトルの長さを移動割合に補正
+            dir = dir.normalized * movingRatio;
+            go.transform.localPosition = new Vector3(dir.x, 0, -dir.y) * 10;
+
+            lookAt.x = dir.x * _irisTranslationScale;
+            lookAt.y = -dir.y * _irisTranslationScale;
+            lookAt.z = -1;
+        }
+    }
+
     void trackingFacePoints() {
         if (SMT.isFacePointsDetected()) {
             Vector3 face;
             Vector3 leftEye;
             Vector3 rightEye;
-            SMT.getFacePoints(out face , out leftEye, out rightEye);
+            Vector3 leftIris;
+            Vector3 rightIris;
+            SMT.getFacePoints(out face, out leftEye, out rightEye, out leftIris, out rightIris);
 
             // 目の間の距離
             var eyeLtoR = rightEye - leftEye;
@@ -374,14 +461,45 @@ public class MainCaera : MonoBehaviour {
             smoothTransform(ref facePosition, ref faceRotationEuler);
 
             var faceRotation = Quaternion.Euler(faceRotationEuler);
-            _head.transform.position = facePosition;
-            _head.transform.rotation = faceRotation;
+            if (_useFaceTracking) {
+                _head.transform.position = facePosition;
+                _head.transform.rotation = faceRotation;
+            }
 
             // 顏の中央位置を自動調整
             if (_autoAdjustmentRatio > 0) {
                 var z = _calibratedFacePosition.z; // Zは維持、XYのみずれやすいので調整する
                 _calibratedFacePosition = (_calibratedFacePosition * (1.0f - _autoAdjustmentRatio)) + (face * _autoAdjustmentRatio);
                 _calibratedFacePosition.z = z;
+            }
+
+
+            // アイトラキング(虹彩追跡)
+            if (_useEyeTracking) {
+                float headRotationZ = -Mathf.Atan(eyeLtoR.y / eyeLtoR.x) * Mathf.Rad2Deg;
+
+                Vector3 leftLookAt;
+                trackingEyes(leftEye, _leftEyeList, leftIris, _leftIrisList, _leftIris, headRotationZ, out leftLookAt);
+
+                Vector3 rightLookAt;
+                trackingEyes(rightEye, _rightEyeList, rightIris, _rightIrisList, _rightIris, headRotationZ, out rightLookAt);
+
+                if (_useEyesLRBlinkSynced) {
+                    var lts = _leftIris.GetComponent<TrackerSender>();
+                    var rts = _rightIris.GetComponent<TrackerSender>();
+                    var eyeOpenAve = (lts.BlendShapeValue + rts.BlendShapeValue) / 2;
+                    lts.BlendShapeValue = eyeOpenAve;
+                    rts.BlendShapeValue = eyeOpenAve;
+                }
+
+                Vector3 lookAt = leftLookAt + rightLookAt;
+                if (lookAt.z > 0) {
+                    lookAt = lookAt / Mathf.Abs(lookAt.z); // 注視点は-1なので-2になっていたら平均値を取る
+                 } else {
+                    lookAt.z = -1;
+                }
+                lookAt.y += 0.33f;
+                _lookAt.transform.localPosition = lookAt;
             }
         }
     }
@@ -414,7 +532,7 @@ public class MainCaera : MonoBehaviour {
         if (_useARMarker) {
             trackingHeadARMarker();
         }
-        if (_useFaceTracking) {
+        if (_useFaceTracking || _useEyeTracking) {
             trackingFacePoints();
         }
 
