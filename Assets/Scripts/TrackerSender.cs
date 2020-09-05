@@ -33,6 +33,7 @@ public class TrackerSender : MonoBehaviour {
     uOSC.uOscClient client = null;
 
     public GameObject _object;
+    public GameObject _lookAt;
 
     public void ChangePort(int port) {
         if (client == null) {
@@ -45,6 +46,13 @@ public class TrackerSender : MonoBehaviour {
         client.enabled = true;
     }
 
+    public void setClientEnabled(bool isEnabled) {
+        if (client == null) {
+            return;
+        }
+        client.enabled = isEnabled;
+    }
+
     void Start() {
         client = GetComponent<uOSC.uOscClient>();
     }
@@ -54,7 +62,7 @@ public class TrackerSender : MonoBehaviour {
             return;
         }
 
-        {
+        if (_object != null) {
             string name = null;
             switch (DeviceMode) {
                 case VirtualDevice.HMD:
@@ -83,7 +91,12 @@ public class TrackerSender : MonoBehaviour {
             }
         }
 
-        if(!String.IsNullOrEmpty(BlendShapeName)) {
+        if (_lookAt != null) {
+            var p = _lookAt.transform.localPosition;
+            client.Send("/VMC/Ext/Set/Eye", 1, p.x, p.y, p.z);
+        }
+
+        if (!String.IsNullOrEmpty(BlendShapeName)) {
             client.Send("/VMC/Ext/Blend/Val", BlendShapeName, BlendShapeValue);
             client.Send("/VMC/Ext/Blend/Apply");
         }

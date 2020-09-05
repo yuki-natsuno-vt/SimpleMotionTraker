@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,39 +10,81 @@ public class MainCaera : MonoBehaviour {
     [SerializeField] GameObject _head;
     [SerializeField] GameObject _leftHand;
     [SerializeField] GameObject _rightHand;
-    [SerializeField] InputField _uOSCInputField;
+    [SerializeField] GameObject _leftIris;
+    [SerializeField] GameObject _rightIris;
+    [SerializeField] GameObject _lookAt;
+
+    [SerializeField] Toggle _forceTPoseToggle;
+    [SerializeField] Toggle _useFaceTrackingToggle;
     [SerializeField] InputField _faceAngleBaseDistanceInputField;
     [SerializeField] InputField _translationMagnificationInputField;
+    [SerializeField] InputField _translationMagnificationXInputField;
+    [SerializeField] InputField _translationMagnificationYInputField;
+    [SerializeField] InputField _translationMagnificationZInputField;
     [SerializeField] InputField _rotationMagnificationInputField;
+    [SerializeField] InputField _rotationMagnificationXInputField;
+    [SerializeField] InputField _rotationMagnificationYInputField;
+    [SerializeField] InputField _rotationMagnificationZInputField;
+    [SerializeField] Toggle _useEyeTrackingToggle;
+    [SerializeField] Toggle _useEyeBlinkToggle;
+    [SerializeField] Toggle _useEyeLRSyncToggle;
+    [SerializeField] InputField _irisThresholdInputField;
+    [SerializeField] InputField _irisOffsetXInputField;
+    [SerializeField] InputField _irisOffsetYInputField;
+    [SerializeField] InputField _irisTranslationMagnificationXInputField;
+    [SerializeField] InputField _irisTranslationMagnificationYInputField;
+    [SerializeField] InputField _eyeOpenThresholdMinInputField;
+    [SerializeField] InputField _eyeOpenThresholdMaxInputField;
     [SerializeField] InputField _smoothingLevelInputField;
     [SerializeField] InputField _autoAdjustmentInputField;
+    [SerializeField] InputField _autoAdjustmentDelayInputField;
     [SerializeField] Dropdown _videoDeviceList;
     [SerializeField] Text _selectedVideoDeviceName;
     [SerializeField] Text _cameraStartButtonText;
+    [SerializeField] Toggle _mirrorToggle;
+    [SerializeField] InputField _uOSCInputField;
+    [SerializeField] Toggle _showCaptureImageToggle;
 
     int _zAxisFlipFrameCount = 0; // フリップ発生フレーム数.
 
     int _cameraId = 0;
 
-    bool _isCaptureShown = false;
     bool _isForcedTPose = false;
     bool _useARMarker = false;
     bool _useFaceTracking = false;
-    bool _useEyeTracking = false;
 
     float _faceAngleBaseDistance = 0.20f;
     float _translationMagnification = 1.0f;
+    Vector3 _translationMagnifications = Vector3.one;
     float _rotationMagnification = 1.0f;
+    Vector3 _rotationMagnifications = Vector3.one;
 
     Vector3 _calibratedLeftHandPosition;
     Quaternion _calibratedLeftHandRotation;
     Vector3 _calibratedRightHandPosition;
     Quaternion _calibratedRightHandRotation;
-
-
+    
     Vector3 _calibratedFacePosition;
     Vector3 _calibratedLeftEyePosition;
     Vector3 _calibratedRigthEyePosition;
+
+    bool _useEyeTracking = false;
+    bool _useEyesBlink = true;
+    bool _useEyesLRSync = true;
+    int _irisThreshold = 30;
+    Vector2 _irisOffset = Vector2.zero;
+    Vector2 _irisTranslationMagnifications = Vector2.one;
+    float _maxEyeOpenThreshold = 0.41f;
+    float _minEyeOpenThreshold = 0.3f;
+
+    const int MAX_EYE_SMOOTHING = 20;
+    List<Vector3> _leftEyeList;
+    List<Vector3> _rightEyeList;
+
+    const int MAX_IRIS_SMOOTHING = 5;
+    List<Vector3> _leftIrisList;
+    List<Vector3> _rightIrisList;
+
 
     const int MAX_SMOOTHING_LEVEL = 30;
     int _smoothingLevel = 3;
@@ -49,11 +92,149 @@ public class MainCaera : MonoBehaviour {
     List<Vector3> _faceRotationList;
 
     float _autoAdjustmentRatio = 0.0f;
+    float _autoAdjustmentDelay = 0.0f;
+    float _autoAdjustmentDelayStartTime = 0;
 
+    string _deviceName;
+    float _mirror = 1;
+
+    int _port = 0;
+
+    bool _isCaptureShown = false;
+
+    public void OnUseARMarker() {
+        _useARMarker = !_useARMarker;
+        SMT.setUseARMarker(_useARMarker);
+    }
+
+    public void OnUseFaceTracking() {
+        _useFaceTracking = _useFaceTrackingToggle.isOn;
+        SMT.setUseFaceTracking(_useFaceTracking);
+    }
+
+    public void OnChangeForceTPose() {
+        _isForcedTPose = _forceTPoseToggle.isOn;
+    }
+
+    public void OnChangeFaceAngleBaseDistance() {
+        _faceAngleBaseDistance = float.Parse(_faceAngleBaseDistanceInputField.text);
+    }
+
+    public void OnChangeTranslationMagnification() {
+        _translationMagnification = float.Parse(_translationMagnificationInputField.text);
+    }
+
+    public void OnChangeTranslationMagnificationX() {
+        _translationMagnifications.x = float.Parse(_translationMagnificationXInputField.text);
+    }
+
+    public void OnChangeTranslationMagnificationY() {
+        _translationMagnifications.y = float.Parse(_translationMagnificationYInputField.text);
+    }
+
+    public void OnChangeTranslationMagnificationZ() {
+        _translationMagnifications.z = float.Parse(_translationMagnificationZInputField.text);
+    }
+
+    public void OnChangeRotationMagnification() {
+        _rotationMagnification = float.Parse(_rotationMagnificationInputField.text);
+    }
+
+    public void OnChangeRotationMagnificationX() {
+        _rotationMagnifications.x = float.Parse(_rotationMagnificationXInputField.text);
+    }
+
+    public void OnChangeRotationMagnificationY() {
+        _rotationMagnifications.y = float.Parse(_rotationMagnificationYInputField.text);
+    }
+
+    public void OnChangeRotationMagnificationZ() {
+        _rotationMagnifications.z = float.Parse(_rotationMagnificationZInputField.text);
+    }
+
+    public void OnClickCalibrateFacePoints() {
+        Vector3 face;
+        Vector3 leftEye;
+        Vector3 rightEye;
+        Vector3 leftIris;
+        Vector3 rightIris;
+        SMT.getFacePoints(out face, out leftEye, out rightEye, out leftIris, out rightIris);
+
+        _calibratedFacePosition = face;
+        _calibratedLeftEyePosition = leftEye;
+        _calibratedRigthEyePosition = rightEye;
+    }
+
+    public void OnChangeUseEyeTracking() {
+        _useEyeTracking = _useEyeTrackingToggle.isOn;
+        SMT.setUseEyeTracking(_useEyeTracking);
+        _head.GetComponent<HeadTrackerSender>()._useEyeTracking = _useEyeTracking;
+    }
+
+    public void OnChangeUseBlink() {
+        _useEyesBlink = _useEyeBlinkToggle.isOn;
+        _leftIris.GetComponent<TrackerSender>().setClientEnabled(_useEyesBlink);
+        _rightIris.GetComponent<TrackerSender>().setClientEnabled(_useEyesBlink);
+    }
+
+    public void OnChangeLRSync() {
+        _useEyesLRSync = _useEyeLRSyncToggle.isOn;
+    }
+
+    public void OnChangeIrisThreshold() {
+        _irisThreshold = Mathf.Clamp(int.Parse(_irisThresholdInputField.text), 0, 255);
+        _irisThresholdInputField.text = _irisThreshold.ToString();
+        SMT.setIrisThresh(_irisThreshold);
+    }
+
+    public void OnChangeIrisOffsetX() {
+        _irisOffset.x = Mathf.Clamp(float.Parse(_irisOffsetXInputField.text), -1.0f, 1.0f);
+        _irisOffsetXInputField.text = _irisOffset.x.ToString();
+    }
+
+    public void OnChangeIrisOffsetY() {
+        _irisOffset.y = Mathf.Clamp(float.Parse(_irisOffsetYInputField.text), -1.0f, 1.0f);
+        _irisOffsetYInputField.text = _irisOffset.y.ToString();
+    }
+
+    public void OnChangeIrisTranslationMagnificationX() {
+        _irisTranslationMagnifications.x = float.Parse(_irisTranslationMagnificationXInputField.text);
+    }
+
+    public void OnChangeIrisTranslationMagnificationY() {
+        _irisTranslationMagnifications.y = float.Parse(_irisTranslationMagnificationYInputField.text);
+    }
+
+    public void OnChangeEyeOpenThresholdMin() {
+        _minEyeOpenThreshold = float.Parse(_eyeOpenThresholdMinInputField.text);
+    }
+
+    public void OnChangeEyeOpenThresholdMax() {
+        _maxEyeOpenThreshold = float.Parse(_eyeOpenThresholdMaxInputField.text);
+    }
+
+    public void OnChangeSmoothingLevel() {
+        _smoothingLevel = Mathf.Clamp(int.Parse(_smoothingLevelInputField.text), 1, MAX_SMOOTHING_LEVEL);
+        _smoothingLevelInputField.text = _smoothingLevel.ToString();
+    }
+    
+    public void OnChangeAutoAdjustment() {
+        _autoAdjustmentRatio = Mathf.Clamp(float.Parse(_autoAdjustmentInputField.text), 0, 1.0f);
+        _autoAdjustmentInputField.text = _autoAdjustmentRatio.ToString();
+    }
+
+    public void OnChangeAutoAdjustmentDelay() {
+        _autoAdjustmentDelay = float.Parse(_autoAdjustmentDelayInputField.text);
+        if (_autoAdjustmentDelay < 0) {
+            _autoAdjustmentDelay = 0;
+        }
+        _autoAdjustmentDelayInputField.text = _autoAdjustmentDelay.ToString();
+    }
 
     public void OnChangeVideoDeviceList() {
         SMT.destroy();
         _cameraStartButtonText.text = "Start";
+        _deviceName = _selectedVideoDeviceName.text;
     }
 
     public void OnClickApplyCameraId() {
@@ -66,80 +247,139 @@ public class MainCaera : MonoBehaviour {
         SMT.setUseEyeTracking(_useEyeTracking);
     }
 
-    public void OnChangedOSCPort() {
-        var port = int.Parse(_uOSCInputField.text);
-        _head.GetComponent<TrackerSender>().ChangePort(port);
-        _leftHand.GetComponent<TrackerSender>().ChangePort(port);
-        _rightHand.GetComponent<TrackerSender>().ChangePort(port);
+    public void OnChangeMirror() {
+        if (_mirrorToggle.isOn) {
+            _mirror = -1;
+        } else {
+            _mirror = 1;
+        }
     }
 
+    public void OnChangedOSCPort() {
+        _port = int.Parse(_uOSCInputField.text);
+        _head.GetComponent<HeadTrackerSender>().ChangePort(_port);
+        _leftHand.GetComponent<TrackerSender>().ChangePort(_port);
+        _rightHand.GetComponent<TrackerSender>().ChangePort(_port);
+        _leftIris.GetComponent<TrackerSender>().ChangePort(_port);
+        _rightIris.GetComponent<TrackerSender>().ChangePort(_port);
+    }
+    
     public void OnChangeCaptureShown() {
-        _isCaptureShown = !_isCaptureShown;
+        _isCaptureShown = _showCaptureImageToggle.isOn;
         SMT.setCaptureShown(_isCaptureShown);
     }
-    
-    public void OnUseARMarker() {
-        _useARMarker = !_useARMarker;
-        SMT.setUseARMarker(_useARMarker);
-    }
 
-    public void OnUseFaceTracking() {
-        _useFaceTracking = !_useFaceTracking;
-        SMT.setUseFaceTracking(_useFaceTracking);
-    }
-
-    public void OnUseEyeTracking() {
-        _useEyeTracking = !_useEyeTracking;
-        SMT.setUseEyeTracking(_useEyeTracking);
-    }
-
-    public void OnChangeForceTPose() {
-        _isForcedTPose = !_isForcedTPose;
-    }
-
-    public void OnChangeFaceAngleBaseDistance() {
-        _faceAngleBaseDistance = float.Parse(_faceAngleBaseDistanceInputField.text);
-    }
-
-    public void OnChangeTranslationMagnification() {
-        _translationMagnification = float.Parse(_translationMagnificationInputField.text);
-    }
-
-    public void OnChangeRotationMagnification() {
-        _rotationMagnification = float.Parse(_rotationMagnificationInputField.text);
-    }
-
-    public void OnChangeSmoothingLevel() {
-        _smoothingLevel = int.Parse(_smoothingLevelInputField.text);
-        if (_smoothingLevel < 1) {
-            _smoothingLevel = 1;
+    public void OnClickSave() {
+        var fileName = SMT.getSaveFileName();
+        if (string.IsNullOrEmpty(fileName)) {
+            return;
         }
-        if (_smoothingLevel >= MAX_SMOOTHING_LEVEL) {
-            _smoothingLevel = MAX_SMOOTHING_LEVEL;
-        }
-        _smoothingLevelInputField.text = _smoothingLevel.ToString();
-    }
-    
-    public void OnChangeAutoAdjustment() {
-        _autoAdjustmentRatio = float.Parse(_autoAdjustmentInputField.text);
-        if (_autoAdjustmentRatio < 0) {
-            _autoAdjustmentRatio = 0;
-        }
-        if (_autoAdjustmentRatio > 1) {
-            _autoAdjustmentRatio = 1;
-        }
-        _autoAdjustmentInputField.text = _autoAdjustmentRatio.ToString();
+        var p = new Parameter();
+        p.deviceName = _deviceName;
+        p.isForcedTPose = _isForcedTPose;
+        //p.useARMarker = _useARMarker;
+        p.useFaceTracking = _useFaceTracking;
+        p.faceAngleBaseDistance = _faceAngleBaseDistance;
+        p.translationMagnification = _translationMagnification;
+        p.translationMagnifications = _translationMagnifications;
+        p.rotationMagnification = _rotationMagnification;
+        p.rotationMagnifications = _rotationMagnifications;
+        p.useEyeTracking = _useEyeTracking;
+        p.useEyesLRSync = _useEyesLRSync;
+        p.useEyesBlink = _useEyesBlink;
+        p.irisThreshold = _irisThreshold;
+        p.irisOffset = _irisOffset;
+        p.irisTranslationMagnifications = _irisTranslationMagnifications;
+        p.maxEyeOpenThreshold = _maxEyeOpenThreshold;
+        p.minEyeOpenThreshold = _minEyeOpenThreshold;
+        p.smoothingLevel = _smoothingLevel;
+        p.autoAdjustmentRatio = _autoAdjustmentRatio;
+        p.autoAdjustmentDelay = _autoAdjustmentDelay;
+        p.mirror = _mirror;
+        p.port = _port;
+
+        string json = JsonUtility.ToJson(p);
+        File.WriteAllText(fileName, json);
     }
 
-    public void OnClickCalibrateFacePoints() {
-        Vector3 face;
-        Vector3 leftEye;
-        Vector3 rightEye;
-        SMT.getFacePoints(out face, out leftEye, out rightEye);
+    public void OnClickLoad() {
+        var fileName = SMT.getOpenFileName();
+        if (string.IsNullOrEmpty(fileName)) {
+            return;
+        }
+        string json = File.ReadAllText(fileName);
+        Parameter p = JsonUtility.FromJson<Parameter>(json);
 
-        _calibratedFacePosition = face;
-        _calibratedLeftEyePosition = leftEye;
-        _calibratedRigthEyePosition = rightEye;
+        _forceTPoseToggle.isOn = p.isForcedTPose;
+        // = p.useARMarker;
+        _useFaceTrackingToggle.isOn = p.useFaceTracking;
+        _faceAngleBaseDistanceInputField.text = p.faceAngleBaseDistance.ToString();
+        _translationMagnificationInputField.text = p.translationMagnification.ToString();
+        _translationMagnificationXInputField.text = p.translationMagnifications.x.ToString();
+        _translationMagnificationYInputField.text = p.translationMagnifications.y.ToString();
+        _translationMagnificationZInputField.text = p.translationMagnifications.z.ToString();
+        _rotationMagnificationInputField.text = p.rotationMagnification.ToString();
+        _rotationMagnificationXInputField.text = p.rotationMagnifications.x.ToString();
+        _rotationMagnificationYInputField.text = p.rotationMagnifications.y.ToString();
+        _rotationMagnificationZInputField.text = p.rotationMagnifications.z.ToString();
+        _useEyeTrackingToggle.isOn = p.useEyeTracking;
+        _useEyeLRSyncToggle.isOn = p.useEyesLRSync;
+        _useEyeBlinkToggle.isOn = p.useEyesBlink;
+        _irisThresholdInputField.text = p.irisThreshold.ToString();
+        _irisOffsetXInputField.text = p.irisOffset.x.ToString();
+        _irisOffsetYInputField.text = p.irisOffset.y.ToString();
+        _irisTranslationMagnificationXInputField.text = p.irisTranslationMagnifications.x.ToString();
+        _irisTranslationMagnificationYInputField.text = p.irisTranslationMagnifications.y.ToString();
+        _eyeOpenThresholdMaxInputField.text = p.maxEyeOpenThreshold.ToString();
+        _eyeOpenThresholdMinInputField.text = p.minEyeOpenThreshold.ToString();
+        _smoothingLevelInputField.text = p.smoothingLevel.ToString();
+        _autoAdjustmentInputField.text = p.autoAdjustmentRatio.ToString();
+        _autoAdjustmentDelayInputField.text = p.autoAdjustmentDelay.ToString();
+        _mirrorToggle.isOn = (p.mirror == 1);
+        _uOSCInputField.text = p.port.ToString();
+        
+        int i = 0;
+        foreach (var item in _videoDeviceList.options) {
+            if (item.text == p.deviceName) {
+                _videoDeviceList.value = i;
+                _deviceName = p.deviceName;
+                break;
+            }
+            i++;
+        }
+
+        refreshUI();
+    }
+
+    void refreshUI() {
+        OnUseFaceTracking();
+        OnChangeForceTPose();
+        OnChangeFaceAngleBaseDistance();
+        OnChangeTranslationMagnification();
+        OnChangeTranslationMagnificationX();
+        OnChangeTranslationMagnificationY();
+        OnChangeTranslationMagnificationZ();
+        OnChangeRotationMagnification();
+        OnChangeRotationMagnificationX();
+        OnChangeRotationMagnificationY();
+        OnChangeRotationMagnificationZ();
+        OnClickCalibrateFacePoints();
+        OnChangeUseEyeTracking();
+        OnChangeUseBlink();
+        OnChangeLRSync();
+        OnChangeIrisThreshold();
+        OnChangeIrisOffsetX();
+        OnChangeIrisOffsetY();
+        OnChangeIrisTranslationMagnificationX();
+        OnChangeIrisTranslationMagnificationY();
+        OnChangeEyeOpenThresholdMin();
+        OnChangeEyeOpenThresholdMax();
+        OnChangeSmoothingLevel();
+        OnChangeAutoAdjustment();
+        OnChangeAutoAdjustmentDelay();
+        OnChangeVideoDeviceList();
+        OnChangeMirror();
+        OnChangedOSCPort();
     }
 
     Vector3 halfAngleVector3(Vector3 eulerAngles) {
@@ -151,7 +391,6 @@ public class MainCaera : MonoBehaviour {
     }
 
     void smoothTransform(ref Vector3 t, ref Vector3 r) {
-
         _facePositionList.RemoveAt(_facePositionList.Count - 1);
         _facePositionList.Insert(0, t);
 
@@ -166,6 +405,17 @@ public class MainCaera : MonoBehaviour {
         }
         t = t / _smoothingLevel;
         r = r / _smoothingLevel;
+    }
+
+    void smooth(ref Vector3 v, List<Vector3> list, int length) {
+        list.RemoveAt(list.Count - 1);
+        list.Insert(0, v);
+
+        v.Set(0, 0, 0);
+        for (int i = 0; i < length; i++) {
+            v = v + list[i];
+        }
+        v = v / length;
     }
 
     // Use this for initialization
@@ -189,27 +439,59 @@ public class MainCaera : MonoBehaviour {
         _calibratedLeftEyePosition = Vector3.zero;
         _calibratedRigthEyePosition = Vector3.zero;
 
+        _forceTPoseToggle.isOn = false;
+        _useFaceTrackingToggle.isOn = false;
         _faceAngleBaseDistanceInputField.text = "0.2";
-        OnChangeFaceAngleBaseDistance();
         _translationMagnificationInputField.text = "1.0";
-        OnChangeTranslationMagnification();
+        _translationMagnificationXInputField.text = "1.0";
+        _translationMagnificationYInputField.text = "1.0";
+        _translationMagnificationZInputField.text = "1.0";
         _rotationMagnificationInputField.text = "1.0";
-        OnChangeRotationMagnification();
+        _rotationMagnificationXInputField.text = "1.0";
+        _rotationMagnificationYInputField.text = "1.0";
+        _rotationMagnificationZInputField.text = "1.0";
+
+        _useEyeTrackingToggle.isOn = false;
+        _useEyeBlinkToggle.isOn = true;
+        _useEyeLRSyncToggle.isOn = true;
+        _irisThresholdInputField.text = "30";
+        _irisOffsetXInputField.text = "0";
+        _irisOffsetYInputField.text = "0";
+        _irisTranslationMagnificationXInputField.text = "2.0";
+        _irisTranslationMagnificationYInputField.text = "2.0";
+        _eyeOpenThresholdMinInputField.text = "0.3";
+        _eyeOpenThresholdMaxInputField.text = "0.6";
 
         _smoothingLevelInputField.text = "5";
-        OnChangeSmoothingLevel();
 
         _autoAdjustmentInputField.text = "0.05";
-        OnChangeAutoAdjustment();
+        _autoAdjustmentDelayInputField.text = "2.0";
+        _autoAdjustmentDelayStartTime = Time.time;
+        _mirrorToggle.isOn = false;
 
         _uOSCInputField.text = "39540";
-        OnChangedOSCPort();
+
+        refreshUI();
 
         _facePositionList = new List<Vector3>();
         _faceRotationList = new List<Vector3>();
         for (int i = 0; i < MAX_SMOOTHING_LEVEL; i++) {
             _facePositionList.Add(Vector3.zero);
             _faceRotationList.Add(Vector3.zero);
+        }
+
+        _leftIrisList = new List<Vector3>();
+        _rightIrisList = new List<Vector3>();
+        for (int i = 0; i < MAX_IRIS_SMOOTHING; i++) {
+            _leftIrisList.Add(Vector3.zero);
+            _rightIrisList.Add(Vector3.zero);
+        }
+
+        _leftEyeList = new List<Vector3>();
+        _rightEyeList = new List<Vector3>();
+        for (int i = 0; i < MAX_EYE_SMOOTHING; i++) {
+            _leftEyeList.Add(Vector3.zero);
+            _rightEyeList.Add(Vector3.zero);
         }
     }
 
@@ -317,12 +599,58 @@ public class MainCaera : MonoBehaviour {
         _rightHand.transform.rotation = headRotation * Quaternion.Euler(-25, -45, 67);
     }
 
+    void trackingEyes(Vector3 eye, List<Vector3> eyeList, 
+                      Vector3 iris, List<Vector3> irisList, 
+                      GameObject go, float headRotationZ, out Vector3 lookAt) {
+        // 目の開閉を計算
+        smooth(ref eye, eyeList, MAX_EYE_SMOOTHING);
+        smooth(ref iris, irisList, MAX_IRIS_SMOOTHING);
+        float open = iris.z;
+        open = Mathf.Clamp(open, 0, 1.0f);
+        if (open > _maxEyeOpenThreshold) {
+            open = _maxEyeOpenThreshold;
+        }
+        else if (open < _minEyeOpenThreshold) {
+            open = _minEyeOpenThreshold;
+        }
+        open -= _minEyeOpenThreshold;
+        var range = _maxEyeOpenThreshold - _minEyeOpenThreshold;
+        if (range <= 0) {
+            range = 0.0001f;
+        }
+        open = open / (_maxEyeOpenThreshold - _minEyeOpenThreshold);
+        go.transform.localScale = new Vector3(1, 1, open);
+        go.GetComponent<TrackerSender>().BlendShapeValue = 1.0f - open;
+
+        // 虹彩の移動量と注視点を計算
+        lookAt = Vector3.zero;
+        if (open > 0) {
+            // 目の中心から虹彩に向けたベクトル
+            var dir = iris - eye;
+            dir.z = 0;
+            // 頭の回転分だけ補正
+            dir = Quaternion.Euler(0, 0, headRotationZ) * dir;
+            // 目の範囲内でどれくらい移動しているか
+            var movingRatio = dir.magnitude / eye.z;
+            movingRatio = Mathf.Clamp(movingRatio, -1, 1);
+            // 向きベクトルの長さを移動割合に補正
+            dir = dir.normalized * movingRatio;
+            go.transform.localPosition = new Vector3(dir.x, 0, -dir.y) * 10;
+
+            lookAt.x = dir.x;
+            lookAt.y = -dir.y;
+            lookAt.z = -1;
+        }
+    }
+
     void trackingFacePoints() {
         if (SMT.isFacePointsDetected()) {
             Vector3 face;
             Vector3 leftEye;
             Vector3 rightEye;
-            SMT.getFacePoints(out face , out leftEye, out rightEye);
+            Vector3 leftIris;
+            Vector3 rightIris;
+            SMT.getFacePoints(out face, out leftEye, out rightEye, out leftIris, out rightIris);
 
             // 目の間の距離
             var eyeLtoR = rightEye - leftEye;
@@ -362,26 +690,84 @@ public class MainCaera : MonoBehaviour {
 
             // 倍率適用
             facePosition = facePosition * _translationMagnification;
+            facePosition.x *= _translationMagnifications.x * _mirror;
+            facePosition.y *= _translationMagnifications.y;
+            facePosition.z *= _translationMagnifications.z;
+
             faceRotationEuler = faceRotationEuler * _rotationMagnification;
+            faceRotationEuler.x *= _rotationMagnifications.x;
+            faceRotationEuler.y *= _rotationMagnifications.y * _mirror;
+            faceRotationEuler.z *= _rotationMagnifications.z * _mirror;
             if (faceRotationEuler.x < -75) faceRotationEuler.x = -75;
             if (faceRotationEuler.x > 75) faceRotationEuler.x = 75;
             if (faceRotationEuler.z < -75) faceRotationEuler.z = -75;
             if (faceRotationEuler.z > 75) faceRotationEuler.z = 75;
-
+            
             // オフセット適用
             facePosition.y += 1.3f;
 
-            smoothTransform(ref facePosition, ref faceRotationEuler);
+            smooth(ref faceRotationEuler, _faceRotationList, _smoothingLevel);
+            smooth(ref facePosition, _facePositionList, _smoothingLevel);
 
             var faceRotation = Quaternion.Euler(faceRotationEuler);
-            _head.transform.position = facePosition;
-            _head.transform.rotation = faceRotation;
+            if (_useFaceTracking) {
+                _head.transform.position = facePosition;
+                _head.transform.rotation = faceRotation;
+            }
 
             // 顏の中央位置を自動調整
             if (_autoAdjustmentRatio > 0) {
-                var z = _calibratedFacePosition.z; // Zは維持、XYのみずれやすいので調整する
-                _calibratedFacePosition = (_calibratedFacePosition * (1.0f - _autoAdjustmentRatio)) + (face * _autoAdjustmentRatio);
-                _calibratedFacePosition.z = z;
+                // 一定角度内は常に調整、角度が大きい場合はDelayだけ待ってから調整開始
+                bool isNarrowAngle = (Mathf.Abs(faceRotationEuler.x) < 5 && Mathf.Abs(faceRotationEuler.y) < 5);
+                bool isExceededWaitingTime = ((Time.time - _autoAdjustmentDelayStartTime) > _autoAdjustmentDelay);
+                if (isNarrowAngle || isExceededWaitingTime) {
+                    var z = _calibratedFacePosition.z; // Zは維持、XYのみずれやすいので調整する
+                    _calibratedFacePosition = (_calibratedFacePosition * (1.0f - _autoAdjustmentRatio)) + (face * _autoAdjustmentRatio);
+                    _calibratedFacePosition.z = z;
+                }
+
+                // 正面を向いた時にオートアジャストの発動カウントをリセット
+                if (isNarrowAngle) {
+                    _autoAdjustmentDelayStartTime = Time.time;
+                }
+            }
+
+
+            // アイトラキング(虹彩追跡)
+            if (_useEyeTracking) {
+                float headRotationZ = -Mathf.Atan(eyeLtoR.y / eyeLtoR.x) * Mathf.Rad2Deg;
+
+                Vector3 leftLookAt;
+                trackingEyes(leftEye, _leftEyeList, leftIris, _leftIrisList, _leftIris, headRotationZ, out leftLookAt);
+
+                Vector3 rightLookAt;
+                trackingEyes(rightEye, _rightEyeList, rightIris, _rightIrisList, _rightIris, headRotationZ, out rightLookAt);
+
+
+                var lts = _leftIris.GetComponent<TrackerSender>();
+                var rts = _rightIris.GetComponent<TrackerSender>();
+                if (_mirror == -1) {
+                    var tmp = lts.BlendShapeValue;
+                    rts.BlendShapeValue = lts.BlendShapeValue;
+                }
+                if (_useEyesLRSync) {
+                    var eyeOpenAve = (lts.BlendShapeValue + rts.BlendShapeValue) / 2;
+                    lts.BlendShapeValue = eyeOpenAve;
+                    rts.BlendShapeValue = eyeOpenAve;
+                }
+
+                Vector3 lookAt = leftLookAt + rightLookAt;
+                if (lookAt.z > 0) {
+                    lookAt = lookAt / Mathf.Abs(lookAt.z); // 注視点は-1なので-2になっていたら平均値を取る
+                 } else {
+                    lookAt.z = -1;
+                }
+                lookAt.x += _irisOffset.x;
+                lookAt.y += _irisOffset.y;
+                lookAt.x *= _irisTranslationMagnifications.x * _mirror;
+                lookAt.y *= _irisTranslationMagnifications.y;
+                lookAt.y += 0.33f;
+                _lookAt.transform.localPosition = lookAt;
             }
         }
     }
@@ -414,7 +800,7 @@ public class MainCaera : MonoBehaviour {
         if (_useARMarker) {
             trackingHeadARMarker();
         }
-        if (_useFaceTracking) {
+        if (_useFaceTracking || _useEyeTracking) {
             trackingFacePoints();
         }
 

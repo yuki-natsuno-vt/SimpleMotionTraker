@@ -1,5 +1,11 @@
 using System.Runtime.InteropServices;
+using System.Diagnostics;
+using System.IO;
+using System.Text;
 using UnityEngine;
+
+
+//using System.Windows.Forms;
 
 public class SMT
 {
@@ -8,6 +14,8 @@ public class SMT
     public const int SMT_ERROR_UNOPEND_CAMERA_PARAM_FILE = -2;
     public const int SMT_ERROR_UNOPEN_FACE_CASCADE = -3;
     public const int SMT_ERROR_UNOPEN_EYE_CASCADE = -4;
+    public const int SMT_ERROR_UNREADABLE_CAMERA = -5;
+    public const int SMT_ERROR_INSUFFICIENT_CAMERA_CAPTURE_SPEED = -6;
 
     [DllImport("SimpleMotionTracker", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern void SMT_init(string videoDeviceName);
@@ -36,10 +44,13 @@ public class SMT
     [DllImport("SimpleMotionTracker")]
     private static extern void SMT_getFacePoints(System.IntPtr outArray);
     [DllImport("SimpleMotionTracker")]
+    private static extern void SMT_setIrisThresh(int thresh);
+    [DllImport("SimpleMotionTracker")]
     private static extern int SMT_getErrorCode();
 
-    public static void init(string videoDeviceName) {
+    public static bool isDebug = false;
 
+    public static void init(string videoDeviceName) {
         SMT_init(videoDeviceName);
     }
 
@@ -104,12 +115,18 @@ public class SMT
     }
 
     /// <summary>
-    /// 画面上の顏の中心、左目、右目位置を取得
+    /// 画面上の顏の中心、左目、右目、左虹彩、右虹彩 位置を取得
     /// z要素は半径
     /// </summary>
-    public static void getFacePoints(out Vector3 face, out Vector3 leftEye, out Vector3 rightEye) {
-        int length = 9;
-        float[] points = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    public static void getFacePoints(out Vector3 face, out Vector3 leftEye, out Vector3 rightEye, out Vector3 leftIris, out Vector3 rightIris) {
+        int length = 15;
+        float[] points = {
+            0, 0, 0, // 頭
+            0, 0, 0, // 左目
+            0, 0, 0, // 右目
+            0, 0, 0, // 左虹彩
+            0, 0, 0, // 右虹彩
+        };
 
         System.IntPtr ptr = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(float)) * length);
         SMT_getFacePoints(ptr);
@@ -118,11 +135,44 @@ public class SMT
         face = new Vector3(points[0], points[1], points[2]);
         leftEye = new Vector3(points[3], points[4], points[5]);
         rightEye = new Vector3(points[6], points[7], points[8]);
+        leftIris = new Vector3(points[9], points[10], points[11]);
+        rightIris = new Vector3(points[12], points[13], points[14]);
     }
 
+    public static void setIrisThresh(int thresh) {
+        SMT_setIrisThresh(thresh);
+    }
 
     public static int getErrorCode() {
         return SMT_getErrorCode();
+    }
+
+    // Unityのエディタ上で実行すると作業ディレクトリが変更された、のようなエラーメッセージが出て強制終了する
+    // ビルド済みのexeの場合は問題ない.
+    public static string getOpenFileName() {
+        var workDir = System.IO.Directory.GetCurrentDirectory();
+
+        ProcessStartInfo pInfo = new ProcessStartInfo();
+        pInfo.FileName = workDir + "/SelectFile.exe";
+        pInfo.Arguments = "-l \"Open Files\" \"Config files(*.cfg)\\0 *.cfg\\0All files(*.*)\\0 *.*\\0\\0\" \"cfg\"";
+        Process p = Process.Start(pInfo);
+        p.WaitForExit();
+
+        var fileName = File.ReadAllText("temp_path");
+        return fileName;
+    }
+
+    public static string getSaveFileName() {
+        var workDir = System.IO.Directory.GetCurrentDirectory();
+
+        ProcessStartInfo pInfo = new ProcessStartInfo();
+        pInfo.FileName = workDir + "/SelectFile.exe";
+        pInfo.Arguments = "-s \"Save Files\" \"Config files(*.cfg)\\0 *.cfg\\0All files(*.*)\\0 *.*\\0\\0\" \"cfg\"";
+        Process p = Process.Start(pInfo);
+        p.WaitForExit();
+
+        var fileName = File.ReadAllText("temp_path");
+        return fileName;
     }
 };
 
