@@ -14,6 +14,8 @@ public class SMT
     public const int SMT_ERROR_UNOPEND_CAMERA_PARAM_FILE = -2;
     public const int SMT_ERROR_UNOPEN_FACE_CASCADE = -3;
     public const int SMT_ERROR_UNOPEN_EYE_CASCADE = -4;
+    public const int SMT_ERROR_UNREADABLE_CAMERA = -5;
+    public const int SMT_ERROR_INSUFFICIENT_CAMERA_CAPTURE_SPEED = -6;
 
     [DllImport("SimpleMotionTracker", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern void SMT_init(string videoDeviceName);
