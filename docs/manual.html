@@ -130,18 +130,56 @@
         <br>
         <h7>Translation Magnification</h7>
         <div class="indent">
-          平行移動量の倍率です。値を大きくすると少しの頭の動きでアバターを大きく移動させることが出来ます（デフォルトは1.0）
+          平行移動量の倍率です。値を大きくすると少しの頭の動きでアバターを大きく移動させることが出来ます（デフォルトは1.0）<br>
+          １つ目は全ての軸の倍率に影響します。２～４個目はそれぞれX, Y, Z軸に影響します。
         </div>
         <br>
         <h7>Rotation Magnification</h7>
         <div class="indent">
-          回転量の倍率です。値を大きくすると少しの頭の動きでアバターを大きく回転させることが出来ます（デフォルトは1.0）
+          回転量の倍率です。値を大きくすると少しの頭の動きでアバターを大きく回転させることが出来ます（デフォルトは1.0）<br>
+          １つ目は全ての軸の倍率に影響します。２～４個目はそれぞれX, Y, Z軸に影響します。
         </div>
         <br>
         <h7>Calibrate Face Points</h7>
         <div class="indent">
           顏の中央位置、奥行きの最背面の位置確定させます。この座標をもとに顏の傾きや前後を検出します。また、この位置より奥へは移動できません。<br>
           ※後述のAuto adjustmentにより補正されます。
+        </div>
+        <br>
+        <h7>Use Eye Tracking</h7>
+        <div class="indent">
+          目の追跡モードを有効にします
+        </div>
+        <br>
+        <h7>Use Blink</h7>
+        <div class="indent">
+          Use Eye Trackingが有効の時、目の開閉を利用します。<br>
+          ※バーチャルモーションキャプチャー側の自動まばたきをOFFにしてください。
+        </div>
+        <br>
+        <h7>LR Sync</h7>
+        <div class="indent">
+          Use Eye Trackingが有効の時、両目の開閉を同期します。（両目の平均値を取る）
+        </div>
+        <br>
+        <h7>Iris Threshold</h7>
+        <div class="indent">
+          虹彩（黒目）の閾値を0～255で指定します。閾値以下の暗さの部分を虹彩として処理します。
+        </div>
+        <br>
+        <h7>Iris Offset</h7>
+        <div class="indent">
+          虹彩のずれを補正します。X, Y軸それぞれ-1～1の間で指定します。
+        </div>
+        <br>
+        <h7>Iris Translation Magnification</h7>
+        <div class="indent">
+          虹彩の平行移動量の倍率です。値を大きくすると機敏に反応します。X, Y軸でそれぞれ指定します。
+        </div>
+        <br>
+        <h7>Eye Open Threshold</h7>
+        <div class="indent">
+          目の開閉の閾値の最小と最大を設定します。最小以下は全て閉じ、最大以上は全て開き、として扱われます。
         </div>
         <br>
         <h7>Smoothing Level</h7>
@@ -155,6 +193,11 @@
           値は0.0～1.0の間で指定してください。0を指定すると無効になります。（デフォルトは0.05）
         </div>
         <br>
+        <h7>AA Delay（Auto Adjustment Delay）</h7>
+        <div class="indent">
+          Auto Adjustmentが発動するまでの時間を設定することが出来ます。単位は秒です。(少数指定可能)
+        </div>
+        <br>
         <h7>Select Video Device</h7>
         <div class="indent">
           カメラの選択です。カメラを変更すると動いていたカメラが停止します<br>
@@ -166,6 +209,11 @@
           選択したカメラに切り替えます。押した後は表示がStartからRunningに切り替わります
         </div>
         <br>
+        <h7>Mirror</h7>
+        <div class="indent">
+          動きを左右反転させます。
+        </div>
+        <br>
         <h7>Port</h7>
         <div class="indent">
           仮想トラッカー情報をVMCへ送るためのポート番号です
@@ -174,6 +222,11 @@
         <h7>Show Capture Image</h7>
         <div class="indent">
           カメラで撮影中の現実が表示されます。カメラで撮影できているかの確認や顏の検出状況の確認が出来ます
+        </div>
+        <br>
+        <h7>Save / Load</h7>
+        <div class="indent">
+          パラメータの設定情報をファイルに保存、ファイルから読み込みます。
         </div>
       </div>
       <br>
