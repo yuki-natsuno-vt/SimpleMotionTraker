@@ -335,7 +335,7 @@ public class MainCaera : MonoBehaviour {
         _smoothingLevelInputField.text = p.smoothingLevel.ToString();
         _autoAdjustmentInputField.text = p.autoAdjustmentRatio.ToString();
         _autoAdjustmentDelayInputField.text = p.autoAdjustmentDelay.ToString();
-        _mirrorToggle.isOn = (p.mirror == 1);
+        _mirrorToggle.isOn = (p.mirror == -1);
         _uOSCInputField.text = p.port.ToString();
         
         int i = 0;
