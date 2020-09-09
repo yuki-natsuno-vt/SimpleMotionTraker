@@ -635,6 +635,7 @@ public class MainCaera : MonoBehaviour {
             movingRatio = Mathf.Clamp(movingRatio, -1, 1);
             // 向きベクトルの長さを移動割合に補正
             dir = dir.normalized * movingRatio;
+            dir.x *= _mirror;
             go.transform.localPosition = new Vector3(dir.x, 0, -dir.y) * 10;
 
             lookAt.x = dir.x;
@@ -764,7 +765,7 @@ public class MainCaera : MonoBehaviour {
                 }
                 lookAt.x += _irisOffset.x;
                 lookAt.y += _irisOffset.y;
-                lookAt.x *= _irisTranslationMagnifications.x * _mirror;
+                lookAt.x *= _irisTranslationMagnifications.x;
                 lookAt.y *= _irisTranslationMagnifications.y;
                 lookAt.y += 0.33f;
                 _lookAt.transform.localPosition = lookAt;
