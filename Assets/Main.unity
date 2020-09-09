@@ -7312,13 +7312,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DeviceMode: 2
   _deviceSerial: VD_SMT_HEAD
-  BlendShapeName: 
-  BlendShapeValue: 0
+  LeftIrisBlendShapeName: Blink_L
+  LeftIrisBlendShapeValue: 0
+  RightIrisBlendShapeName: Blink_R
+  RightIrisBlendShapeValue: 0
   _object: {fileID: 1130792399}
   _lookAt: {fileID: 225331633}
+  _leftIris: {fileID: 2059940499}
+  _rightIris: {fileID: 1645797283}
   _useEyeTracking: 0
+<<<<<<< .merge_file_a22496
   _realAreaOffsetTrnsration: {x: 0.8, y: -0.6, z: -0.1}
   _realAreaOffsetRotation: {x: 0, y: 180, z: 0}
+=======
+  _useEyesBlink: 0
+  _realityAreaOffsetTrnslation: {x: 0, y: 0, z: 0}
+  _realityAreaOffsetRotation: {x: 0, y: 0, z: 0}
+>>>>>>> .merge_file_a23576
 --- !u!114 &1130792401
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10371,8 +10381,6 @@ GameObject:
   - component: {fileID: 1645797286}
   - component: {fileID: 1645797285}
   - component: {fileID: 1645797284}
-  - component: {fileID: 1645797289}
-  - component: {fileID: 1645797288}
   m_Layer: 0
   m_Name: RightIris
   m_TagString: Untagged
@@ -10448,36 +10456,6 @@ Transform:
   m_Father: {fileID: 1528919022}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
---- !u!114 &1645797288
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1645797283}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7d05eff0f925d7f4fbaa01a1f324a13a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  DeviceMode: 2
-  _deviceSerial: VIRTUAL_DEVICE
-  BlendShapeName: Blink_R
-  BlendShapeValue: 0
-  _object: {fileID: 0}
-  _lookAt: {fileID: 0}
---- !u!114 &1645797289
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1645797283}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d36dd9fcae25042bbb815255411ff524, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  address: 127.0.0.1
-  port: 39540
 --- !u!1 &1660377911
 GameObject:
   m_ObjectHideFlags: 0
@@ -12622,8 +12600,6 @@ GameObject:
   - component: {fileID: 2059940503}
   - component: {fileID: 2059940502}
   - component: {fileID: 2059940501}
-  - component: {fileID: 2059940505}
-  - component: {fileID: 2059940504}
   m_Layer: 0
   m_Name: LeftIris
   m_TagString: Untagged
@@ -12699,36 +12675,6 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 2059940499}
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &2059940504
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 2059940499}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7d05eff0f925d7f4fbaa01a1f324a13a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  DeviceMode: 2
-  _deviceSerial: VIRTUAL_DEVICE
-  BlendShapeName: Blink_L
-  BlendShapeValue: 0
-  _object: {fileID: 0}
-  _lookAt: {fileID: 0}
---- !u!114 &2059940505
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 2059940499}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d36dd9fcae25042bbb815255411ff524, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  address: 127.0.0.1
-  port: 39540
 --- !u!1 &2082919412
 GameObject:
   m_ObjectHideFlags: 0

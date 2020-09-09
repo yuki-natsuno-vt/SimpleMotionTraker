@@ -173,8 +173,7 @@ public class MainCaera : MonoBehaviour {
 
     public void OnChangeUseBlink() {
         _useEyesBlink = _useEyeBlinkToggle.isOn;
-        _leftIris.GetComponent<TrackerSender>().setClientEnabled(_useEyesBlink);
-        _rightIris.GetComponent<TrackerSender>().setClientEnabled(_useEyesBlink);
+        _head.GetComponent<HeadTrackerSender>()._useEyesBlink = _useEyesBlink;
     }
 
     public void OnChangeLRSync() {
@@ -260,8 +259,6 @@ public class MainCaera : MonoBehaviour {
         _head.GetComponent<HeadTrackerSender>().ChangePort(_port);
         _leftHand.GetComponent<TrackerSender>().ChangePort(_port);
         _rightHand.GetComponent<TrackerSender>().ChangePort(_port);
-        _leftIris.GetComponent<TrackerSender>().ChangePort(_port);
-        _rightIris.GetComponent<TrackerSender>().ChangePort(_port);
     }
     
     public void OnChangeCaptureShown() {
@@ -620,7 +617,6 @@ public class MainCaera : MonoBehaviour {
         }
         open = open / (_maxEyeOpenThreshold - _minEyeOpenThreshold);
         go.transform.localScale = new Vector3(1, 1, open);
-        go.GetComponent<TrackerSender>().BlendShapeValue = 1.0f - open;
 
         // 虹彩の移動量と注視点を計算
         lookAt = Vector3.zero;
@@ -638,7 +634,7 @@ public class MainCaera : MonoBehaviour {
             dir.x *= _mirror;
             go.transform.localPosition = new Vector3(dir.x, 0, -dir.y) * 10;
 
-            lookAt.x = dir.x;
+            lookAt.x = -dir.x;
             lookAt.y = -dir.y;
             lookAt.z = -1;
         }
@@ -740,21 +736,22 @@ public class MainCaera : MonoBehaviour {
 
                 Vector3 leftLookAt;
                 trackingEyes(leftEye, _leftEyeList, leftIris, _leftIrisList, _leftIris, headRotationZ, out leftLookAt);
+                _head.GetComponent<HeadTrackerSender>().LeftIrisBlendShapeValue = 1.0f - _leftIris.transform.localScale.z;
 
                 Vector3 rightLookAt;
                 trackingEyes(rightEye, _rightEyeList, rightIris, _rightIrisList, _rightIris, headRotationZ, out rightLookAt);
+                _head.GetComponent<HeadTrackerSender>().RightIrisBlendShapeValue = 1.0f - _rightIris.transform.localScale.z;
 
-
-                var lts = _leftIris.GetComponent<TrackerSender>();
-                var rts = _rightIris.GetComponent<TrackerSender>();
+                var hts = _head.GetComponent<HeadTrackerSender>();
                 if (_mirror == -1) {
-                    var tmp = lts.BlendShapeValue;
-                    rts.BlendShapeValue = lts.BlendShapeValue;
+                    var tmp = hts.LeftIrisBlendShapeValue;
+                    hts.LeftIrisBlendShapeValue = hts.RightIrisBlendShapeValue;
+                    hts.RightIrisBlendShapeValue = tmp;
                 }
                 if (_useEyesLRSync) {
-                    var eyeOpenAve = (lts.BlendShapeValue + rts.BlendShapeValue) / 2;
-                    lts.BlendShapeValue = eyeOpenAve;
-                    rts.BlendShapeValue = eyeOpenAve;
+                    var eyeOpenAve = (hts.LeftIrisBlendShapeValue + hts.RightIrisBlendShapeValue) / 2;
+                    hts.LeftIrisBlendShapeValue = eyeOpenAve;
+                    hts.RightIrisBlendShapeValue = eyeOpenAve;
                 }
 
                 Vector3 lookAt = leftLookAt + rightLookAt;

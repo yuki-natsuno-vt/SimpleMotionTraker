@@ -27,15 +27,20 @@ public class HeadTrackerSender : MonoBehaviour {
     public String _deviceSerial = "VIRTUAL_DEVICE";
 
     [Header("BlendShapeProxy")]
-    public string BlendShapeName = "";
-    public float BlendShapeValue = 0f;
+    public string LeftIrisBlendShapeName = "";
+    public float LeftIrisBlendShapeValue = 0f;
+    public string RightIrisBlendShapeName = "";
+    public float RightIrisBlendShapeValue = 0f;
 
     uOSC.uOscClient client = null;
 
     public GameObject _object;
     public GameObject _lookAt;
+    public GameObject _leftIris;
+    public GameObject _rightIris;
 
     public bool _useEyeTracking = false;
+    public bool _useEyesBlink = false;
 
     public Vector3 _realityAreaOffsetTrnslation;
     public Vector3 _realityAreaOffsetRotation;
@@ -97,6 +102,12 @@ public class HeadTrackerSender : MonoBehaviour {
                 var p = _lookAt.transform.localPosition;
                 client.Send("/VMC/Ext/Set/Eye", 1, p.x, p.y, p.z);
             }
+        }
+
+        if (_useEyesBlink) {
+            client.Send("/VMC/Ext/Blend/Val", LeftIrisBlendShapeName, LeftIrisBlendShapeValue);
+            client.Send("/VMC/Ext/Blend/Val", RightIrisBlendShapeName, RightIrisBlendShapeValue);
+            client.Send("/VMC/Ext/Blend/Apply");
         }
     }
 }
