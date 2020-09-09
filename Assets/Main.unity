@@ -7321,14 +7321,9 @@ MonoBehaviour:
   _leftIris: {fileID: 2059940499}
   _rightIris: {fileID: 1645797283}
   _useEyeTracking: 0
-<<<<<<< .merge_file_a22496
-  _realAreaOffsetTrnsration: {x: 0.8, y: -0.6, z: -0.1}
-  _realAreaOffsetRotation: {x: 0, y: 180, z: 0}
-=======
   _useEyesBlink: 0
   _realityAreaOffsetTrnslation: {x: 0, y: 0, z: 0}
   _realityAreaOffsetRotation: {x: 0, y: 0, z: 0}
->>>>>>> .merge_file_a23576
 --- !u!114 &1130792401
 MonoBehaviour:
   m_ObjectHideFlags: 0
