@@ -85,6 +85,10 @@ public class MainCaera : MonoBehaviour {
     List<Vector3> _leftIrisList;
     List<Vector3> _rightIrisList;
 
+    bool _useHandTracking = true;
+    int _handSmoothingLevel = 5;
+    Vector3 _leftHandPositionAve = Vector3.zero;
+    Vector3 _rightHandPositionAve = Vector3.zero;
 
     const int MAX_SMOOTHING_LEVEL = 30;
     int _smoothingLevel = 3;
@@ -244,6 +248,7 @@ public class MainCaera : MonoBehaviour {
         SMT.setUseARMarker(_useARMarker);
         SMT.setUseFaceTracking(_useFaceTracking);
         SMT.setUseEyeTracking(_useEyeTracking);
+        SMT.setUseHandTracking(_useHandTracking);
     }
 
     public void OnChangeMirror() {
@@ -431,7 +436,8 @@ public class MainCaera : MonoBehaviour {
 
         SMT.setUseARMarker(_useARMarker);
         SMT.setUseFaceTracking(_useFaceTracking);
-        
+        SMT.setUseHandTracking(_useHandTracking);
+
         _calibratedFacePosition = Vector3.zero;
         _calibratedLeftEyePosition = Vector3.zero;
         _calibratedRigthEyePosition = Vector3.zero;
@@ -654,7 +660,7 @@ public class MainCaera : MonoBehaviour {
             eyeLtoR.z = 0;
             //float eyeDistance = eyeLtoR.magnitude;
             var faceLength = face.z * 2; // 顏の直径
-            var standardLength = 0.20f; // 20cm
+            var standardLength = 0.15f; // 15cm
             var pixParM = standardLength / faceLength;
 
             var facePosition = face - _calibratedFacePosition;
@@ -770,12 +776,60 @@ public class MainCaera : MonoBehaviour {
         }
     }
 
+    void calcHandPosture(Vector3 handCircle, GameObject go, ref Vector3 positionAve) {
+        // 手の半径は顏の半分
+        var calibratedHandPosition = new Vector3(_calibratedFacePosition.x, _calibratedFacePosition.y, _calibratedFacePosition.z / 2);
+
+        var handLength = handCircle.z * 2; // 手の直径
+        var standardLength = 0.07f; // 10cm
+        var pixParM = standardLength / handLength;
+        var handPosition = handCircle - calibratedHandPosition;
+        handPosition.y *= -1;
+        handPosition *= pixParM;
+
+        if (calibratedHandPosition.z < handCircle.z) {
+            var radiusRatio = handCircle.z / (calibratedHandPosition.z + 1); // 1.0～2.0
+            var distance = radiusRatio - 1.0f;
+            handPosition.z = (-distance * 0.3f) - 0.3f; // 手の長さ60㎝ 30cmはオフセット
+        }
+        else {
+            handPosition.z = 0;
+        }
+
+        // 大きく鵜g書いてみるテスト
+        handPosition.x *= 2;
+        handPosition.y *= 2;
+
+        // オフセット適用
+        handPosition.y += 1.3f;
+
+        // スムージング
+        float smoothingRatio = 1.0f / _handSmoothingLevel;
+        float radiusSmoothigRatio = 1.0f / (_handSmoothingLevel * 1);
+        positionAve.x = (positionAve.x * (1.0f - smoothingRatio)) + (handPosition.x * smoothingRatio);
+        positionAve.y = (positionAve.y * (1.0f - smoothingRatio)) + (handPosition.y * smoothingRatio);
+        positionAve.z = (positionAve.z * (1.0f - radiusSmoothigRatio)) + (handPosition.z * radiusSmoothigRatio);
+        go.transform.position = positionAve;
+    }
+
+    void trackingHandPoints() {
+        Vector3 leftCircle;
+        Vector3 rightCircle;
+        SMT.getHandPoints(out leftCircle, out rightCircle);
+        if (SMT.isLeftHandDetected()) {
+            calcHandPosture(leftCircle, _leftHand, ref _leftHandPositionAve);
+        }
+        if (SMT.isRightHandDetected()) {
+            calcHandPosture(rightCircle, _rightHand, ref _rightHandPositionAve);
+        }
+    }
+
     // Update is called once per frame
     void Update() {
         // バモキャキャリブレーション用に現在の頭の位置を基準にTポーズで固定
         if (_isForcedTPose) {
             // 左手
-            var leftOffset = new Vector3(0.8f, -0.2f, 0);
+            var leftOffset = new Vector3(0.8f, -0.2f, 0.2f);
             leftOffset = _head.transform.rotation * leftOffset;
             _leftHand.transform.position = _head.transform.position + leftOffset;
             _leftHand.transform.rotation = _head.transform.rotation;
@@ -784,7 +838,7 @@ public class MainCaera : MonoBehaviour {
             _calibratedLeftHandRotation = _leftHand.transform.rotation;
 
             // 右手
-            var rightOffset = new Vector3(-0.8f, -0.2f, 0);
+            var rightOffset = new Vector3(-0.8f, -0.2f, 0.2f);
             rightOffset = _head.transform.rotation * rightOffset;
             _rightHand.transform.position = _head.transform.position + rightOffset;
             _rightHand.transform.rotation = _head.transform.rotation;
@@ -801,7 +855,11 @@ public class MainCaera : MonoBehaviour {
         if (_useFaceTracking || _useEyeTracking) {
             trackingFacePoints();
         }
-
-        setStandardHandPose();
+        if (_useHandTracking) {
+            trackingHandPoints();
+        }
+        else {
+            setStandardHandPose();
+        }
     }
 }
