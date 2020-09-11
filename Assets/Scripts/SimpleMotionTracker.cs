@@ -30,6 +30,8 @@ public class SMT
     [DllImport("SimpleMotionTracker")]
     private static extern void SMT_setUseEyeTracking(bool useEyeTracking);
     [DllImport("SimpleMotionTracker")]
+    private static extern void SMT_setUseHandTracking(bool useHandTracking);
+    [DllImport("SimpleMotionTracker")]
     private static extern void SMT_setCaptureShown(bool isShown);
     [DllImport("SimpleMotionTracker")]
     private static extern bool SMT_isCaptureShown();
@@ -45,6 +47,18 @@ public class SMT
     private static extern void SMT_getFacePoints(System.IntPtr outArray);
     [DllImport("SimpleMotionTracker")]
     private static extern void SMT_setIrisThresh(int thresh);
+    [DllImport("SimpleMotionTracker")]
+    private static extern void SMT_setMinHandTranslationThreshold(int thresh);
+    [DllImport("SimpleMotionTracker")]
+    private static extern void SMT_setMaxHandTranslationThreshold(int thresh);
+    [DllImport("SimpleMotionTracker")]
+    private static extern void SMT_setHandUndetectedDuration(int msec);
+    [DllImport("SimpleMotionTracker")]
+    private static extern bool SMT_isLeftHandDetected();
+    [DllImport("SimpleMotionTracker")]
+    private static extern bool SMT_isRightHandDetected();
+    [DllImport("SimpleMotionTracker")]
+    private static extern void SMT_getHandPoints(System.IntPtr outArray);
     [DllImport("SimpleMotionTracker")]
     private static extern int SMT_getErrorCode();
 
@@ -72,6 +86,10 @@ public class SMT
 
     public static void setUseEyeTracking(bool useEyeTracking) {
         SMT_setUseEyeTracking(useEyeTracking);
+    }
+
+    public static void setUseHandTracking(bool useHandTracking) {
+        SMT_setUseHandTracking(useHandTracking);
     }
 
     public static void setCaptureShown(bool isShown) {
@@ -116,7 +134,7 @@ public class SMT
 
     /// <summary>
     /// 画面上の顏の中心、左目、右目、左虹彩、右虹彩 位置を取得
-    /// z要素は半径
+    /// 顏、目のz要素は半径、虹彩のz要素は縦横比
     /// </summary>
     public static void getFacePoints(out Vector3 face, out Vector3 leftEye, out Vector3 rightEye, out Vector3 leftIris, out Vector3 rightIris) {
         int length = 15;
@@ -141,6 +159,45 @@ public class SMT
 
     public static void setIrisThresh(int thresh) {
         SMT_setIrisThresh(thresh);
+    }
+
+    public static void setMinHandTranslationThreshold(int thresh) {
+        SMT_setMinHandTranslationThreshold(thresh);
+    }
+
+    public static void setMaxHandTranslationThreshold(int thresh) {
+        SMT_setMaxHandTranslationThreshold(thresh);
+    }
+
+    public static void setHandUndetectedDuration(int msec) {
+        SMT_setHandUndetectedDuration(msec);
+    }
+
+    public static bool isLeftHandDetected() {
+        return SMT_isLeftHandDetected();
+    }
+
+    public static bool isRightHandDetected() {
+        return SMT_isRightHandDetected();
+    }
+
+    /// <summary>
+    /// 画面上の左手、右手 位置を取得
+    /// z要素は半径
+    /// </summary>
+    public static void getHandPoints(out Vector3 leftHand, out Vector3 rightHand) {
+        int length = 6;
+        float[] points = {
+            0, 0, 0, // 左手
+            0, 0, 0, // 右手
+         };
+
+        System.IntPtr ptr = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(float)) * length);
+        SMT_getHandPoints(ptr);
+        Marshal.Copy(ptr, points, 0, length);
+
+        leftHand = new Vector3(points[0], points[1], points[2]);
+        rightHand = new Vector3(points[3], points[4], points[5]);
     }
 
     public static int getErrorCode() {
