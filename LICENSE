@@ -1,14 +1,14 @@
 
-¦’ˆÓ
-ƒ‰ƒCƒZƒ“ƒX‚Í–{ƒ\ƒtƒgƒEƒFƒAŒÅ—L‚Ì•”•ª‚ÆˆË‘¶ƒ‰ƒCƒuƒ‰ƒŠ‚É‚æ‚èˆÙ‚È‚è‚Ü‚·B
-ƒR[ƒh‚ÌÄ—˜—pAÄ”z•z‚ÌÛ‚ÍˆË‘¶ƒ‰ƒCƒuƒ‰ƒŠ‚Ìƒ‰ƒCƒZƒ“ƒX‚ğŠm”F‚Ìãs‚Á‚Ä‚­‚¾‚³‚¢B
+â€»æ³¨æ„
+ãƒ©ã‚¤ã‚»ãƒ³ã‚¹ã¯æœ¬ã‚½ãƒ•ãƒˆã‚¦ã‚§ã‚¢å›ºæœ‰ã®éƒ¨åˆ†ã¨ä¾å­˜ãƒ©ã‚¤ãƒ–ãƒ©ãƒªã«ã‚ˆã‚Šç•°ãªã‚Šã¾ã™ã€‚
+ã‚³ãƒ¼ãƒ‰ã®å†åˆ©ç”¨ã€å†é…å¸ƒã®éš›ã¯ä¾å­˜ãƒ©ã‚¤ãƒ–ãƒ©ãƒªã®ãƒ©ã‚¤ã‚»ãƒ³ã‚¹ã‚’ç¢ºèªã®ä¸Šè¡Œã£ã¦ãã ã•ã„ã€‚
 
-–{ƒ\ƒtƒgƒEƒFƒA‚Ìƒ‰ƒCƒZƒ“ƒX‚ÍÅ‰º•”‚É‹LÚ‚µ‚Ä‚¢‚Ü‚·B
+æœ¬ã‚½ãƒ•ãƒˆã‚¦ã‚§ã‚¢ã®ãƒ©ã‚¤ã‚»ãƒ³ã‚¹ã¯æœ€ä¸‹éƒ¨ã«è¨˜è¼‰ã—ã¦ã„ã¾ã™ã€‚
 
--–ÚŸ
+-ç›®æ¬¡
 --3rd party license
----OpenCV
----OpenCV Contrib ArUco
+---OpenCV 4.4.0
+---OpenCV Contrib 4.4.0 ArUco
 ---OpenCVDeviceEnumerator
 ---UniVRM
 ---uOSC
@@ -16,19 +16,96 @@
 
 
 *******************************************************************************
-OpenCV
-https://github.com/opencv/opencv/blob/master/LICENSE
-Apache License
-Version 2.0, January 2004
-http://www.apache.org/licenses/
+OpenCV 4.4.0
+https://github.com/opencv/opencv/blob/4.4.0/LICENSE
+By downloading, copying, installing or using the software you agree to this license.
+If you do not agree to this license, do not download, install,
+copy or use the software.
+
+
+                          License Agreement
+               For Open Source Computer Vision Library
+                       (3-clause BSD License)
+
+Copyright (C) 2000-2020, Intel Corporation, all rights reserved.
+Copyright (C) 2009-2011, Willow Garage Inc., all rights reserved.
+Copyright (C) 2009-2016, NVIDIA Corporation, all rights reserved.
+Copyright (C) 2010-2013, Advanced Micro Devices, Inc., all rights reserved.
+Copyright (C) 2015-2016, OpenCV Foundation, all rights reserved.
+Copyright (C) 2015-2016, Itseez Inc., all rights reserved.
+Copyright (C) 2019-2020, Xperience AI, all rights reserved.
+Third party copyrights are property of their respective owners.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice,
+    this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation
+    and/or other materials provided with the distribution.
+
+  * Neither the names of the copyright holders nor the names of the contributors
+    may be used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+This software is provided by the copyright holders and contributors "as is" and
+any express or implied warranties, including, but not limited to, the implied
+warranties of merchantability and fitness for a particular purpose are disclaimed.
+In no event shall copyright holders or contributors be liable for any direct,
+indirect, incidental, special, exemplary, or consequential damages
+(including, but not limited to, procurement of substitute goods or services;
+loss of use, data, or profits; or business interruption) however caused
+and on any theory of liability, whether in contract, strict liability,
+or tort (including negligence or otherwise) arising in any way out of
+the use of this software, even if advised of the possibility of such damage.
 
 
 *******************************************************************************
-https://github.com/opencv/opencv_contrib/blob/master/LICENSE
-OpenCV Contrib
-Apache License
-Version 2.0, January 2004
-http://www.apache.org/licenses/
+OpenCV Contrib 4.4.0
+https://github.com/opencv/opencv_contrib/blob/4.4.0/LICENSE
+By downloading, copying, installing or using the software you agree to this license.
+If you do not agree to this license, do not download, install,
+copy or use the software.
+
+
+                          License Agreement
+               For Open Source Computer Vision Library
+                       (3-clause BSD License)
+
+Copyright (C) 2000-2018, Intel Corporation, all rights reserved.
+Copyright (C) 2009-2011, Willow Garage Inc., all rights reserved.
+Copyright (C) 2009-2015, NVIDIA Corporation, all rights reserved.
+Copyright (C) 2010-2013, Advanced Micro Devices, Inc., all rights reserved.
+Copyright (C) 2015-2018, OpenCV Foundation, all rights reserved.
+Copyright (C) 2015-2016, Itseez Inc., all rights reserved.
+Third party copyrights are property of their respective owners.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice,
+    this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation
+    and/or other materials provided with the distribution.
+
+  * Neither the names of the copyright holders nor the names of the contributors
+    may be used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+This software is provided by the copyright holders and contributors "as is" and
+any express or implied warranties, including, but not limited to, the implied
+warranties of merchantability and fitness for a particular purpose are disclaimed.
+In no event shall copyright holders or contributors be liable for any direct,
+indirect, incidental, special, exemplary, or consequential damages
+(including, but not limited to, procurement of substitute goods or services;
+loss of use, data, or profits; or business interruption) however caused
+and on any theory of liability, whether in contract, strict liability,
+or tort (including negligence or otherwise) arising in any way out of
+the use of this software, even if advised of the possibility of such damage.
 
 
 *******************************************************************************
