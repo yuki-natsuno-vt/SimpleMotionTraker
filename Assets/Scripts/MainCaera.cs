@@ -27,6 +27,7 @@ public class MainCaera : MonoBehaviour {
     [SerializeField] InputField _rotationMagnificationXInputField;
     [SerializeField] InputField _rotationMagnificationYInputField;
     [SerializeField] InputField _rotationMagnificationZInputField;
+
     [SerializeField] Toggle _useEyeTrackingToggle;
     [SerializeField] Toggle _useEyeBlinkToggle;
     [SerializeField] Toggle _useEyeLRSyncToggle;
@@ -37,9 +38,13 @@ public class MainCaera : MonoBehaviour {
     [SerializeField] InputField _irisTranslationMagnificationYInputField;
     [SerializeField] InputField _eyeOpenThresholdMinInputField;
     [SerializeField] InputField _eyeOpenThresholdMaxInputField;
+    
+    [SerializeField] Toggle _useHandTrackingToggle;
+
     [SerializeField] InputField _smoothingLevelInputField;
     [SerializeField] InputField _autoAdjustmentInputField;
     [SerializeField] InputField _autoAdjustmentDelayInputField;
+
     [SerializeField] Dropdown _videoDeviceList;
     [SerializeField] Text _selectedVideoDeviceName;
     [SerializeField] Text _cameraStartButtonText;
@@ -87,8 +92,8 @@ public class MainCaera : MonoBehaviour {
     List<Vector3> _leftIrisList;
     List<Vector3> _rightIrisList;
 
-    bool _useHandTracking = true;
-    const int MAX_HAND_SMOOTHING = 20;
+    bool _useHandTracking = false;
+    const int MAX_HAND_SMOOTHING = 30;
     int _handSmoothingLevel = 10;
     Vector3 _leftHandPositionAve = Vector3.zero;
     Vector3 _rightHandPositionAve = Vector3.zero;
@@ -219,6 +224,11 @@ public class MainCaera : MonoBehaviour {
 
     public void OnChangeEyeOpenThresholdMax() {
         _maxEyeOpenThreshold = float.Parse(_eyeOpenThresholdMaxInputField.text);
+    }
+    
+    public void OnChangeUseHandTracking() {
+        _useHandTracking = _useHandTrackingToggle.isOn;
+        SMT.setUseHandTracking(_useHandTracking);
     }
 
     public void OnChangeSmoothingLevel() {
@@ -385,6 +395,7 @@ public class MainCaera : MonoBehaviour {
         OnChangeEyeOpenThresholdMin();
         OnChangeEyeOpenThresholdMax();
         OnChangeSmoothingLevel();
+        OnChangeUseHandTracking();
         OnChangeAutoAdjustment();
         OnChangeAutoAdjustmentDelay();
         OnChangeVideoDeviceList();
@@ -473,7 +484,9 @@ public class MainCaera : MonoBehaviour {
         _eyeOpenThresholdMinInputField.text = "0.3";
         _eyeOpenThresholdMaxInputField.text = "0.6";
 
-        _smoothingLevelInputField.text = "5";
+        _useHandTrackingToggle.isOn = false;
+
+        _smoothingLevelInputField.text = "10";
 
         _autoAdjustmentInputField.text = "0.05";
         _autoAdjustmentDelayInputField.text = "2.0";
@@ -841,14 +854,16 @@ public class MainCaera : MonoBehaviour {
         handPosition.z += -0.3f; // 30㎝オフセット 
 
         // スムージング
-        float smoothingRatio = 1.0f / _handSmoothingLevel;
-        float radiusSmoothigRatio = 1.0f / (_handSmoothingLevel * 2);
+        //float smoothingRatio = 1.0f / _handSmoothingLevel;
+        //float radiusSmoothigRatio = 1.0f / (_handSmoothingLevel * 2);
+        float smoothingRatio = 1.0f / _smoothingLevel;
+        float radiusSmoothigRatio = 1.0f / (_smoothingLevel * 2);
         positionAve.x = (positionAve.x * (1.0f - smoothingRatio)) + (handPosition.x * smoothingRatio);
         positionAve.y = (positionAve.y * (1.0f - smoothingRatio)) + (handPosition.y * smoothingRatio);
         positionAve.z = (positionAve.z * (1.0f - radiusSmoothigRatio)) + (handPosition.z * radiusSmoothigRatio);
         go.transform.position = positionAve;
 
-
+        // スムージング2
         //smooth(ref handPosition, handList, _handSmoothingLevel);
         //go.transform.position = handPosition;
 
@@ -876,11 +891,11 @@ public class MainCaera : MonoBehaviour {
         Vector3 leftCircle;
         Vector3 rightCircle;
         SMT.getHandPoints(out leftCircle, out rightCircle);
-        {//if (SMT.isLeftHandDetected()) {
+        if (SMT.isLeftHandDetected()) {
             calcHandPosture(leftCircle, _leftHand, _leftHandPropes, ref _leftHandPositionAve, ref _leftHandList);
         }
 
-        {// if (SMT.isRightHandDetected()) {
+        if (SMT.isRightHandDetected()) {
             calcHandPosture(rightCircle, _rightHand, _rightHandPropes, ref _rightHandPositionAve, ref _rightHandList);
         }
     }
