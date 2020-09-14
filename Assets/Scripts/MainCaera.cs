@@ -13,6 +13,8 @@ public class MainCaera : MonoBehaviour {
     [SerializeField] GameObject _leftIris;
     [SerializeField] GameObject _rightIris;
     [SerializeField] GameObject _lookAt;
+    [SerializeField] GameObject _leftHandPropes;
+    [SerializeField] GameObject _rightHandPropes;
 
     [SerializeField] Toggle _forceTPoseToggle;
     [SerializeField] Toggle _useFaceTrackingToggle;
@@ -86,12 +88,15 @@ public class MainCaera : MonoBehaviour {
     List<Vector3> _rightIrisList;
 
     bool _useHandTracking = true;
-    int _handSmoothingLevel = 5;
+    const int MAX_HAND_SMOOTHING = 20;
+    int _handSmoothingLevel = 10;
     Vector3 _leftHandPositionAve = Vector3.zero;
     Vector3 _rightHandPositionAve = Vector3.zero;
+    List<Vector3> _leftHandList;
+    List<Vector3> _rightHandList;
 
     const int MAX_SMOOTHING_LEVEL = 30;
-    int _smoothingLevel = 3;
+    int _smoothingLevel = 10;
     List<Vector3> _facePositionList;
     List<Vector3> _faceRotationList;
 
@@ -249,6 +254,9 @@ public class MainCaera : MonoBehaviour {
         SMT.setUseFaceTracking(_useFaceTracking);
         SMT.setUseEyeTracking(_useEyeTracking);
         SMT.setUseHandTracking(_useHandTracking);
+
+        SMT.setMinHandTranslationThreshold(0.5f);//test
+        SMT.setMaxHandTranslationThreshold(8.0f);//test
     }
 
     public void OnChangeMirror() {
@@ -365,7 +373,7 @@ public class MainCaera : MonoBehaviour {
         OnChangeRotationMagnificationX();
         OnChangeRotationMagnificationY();
         OnChangeRotationMagnificationZ();
-        OnClickCalibrateFacePoints();
+        //OnClickCalibrateFacePoints();
         OnChangeUseEyeTracking();
         OnChangeUseBlink();
         OnChangeLRSync();
@@ -495,6 +503,15 @@ public class MainCaera : MonoBehaviour {
         for (int i = 0; i < MAX_EYE_SMOOTHING; i++) {
             _leftEyeList.Add(Vector3.zero);
             _rightEyeList.Add(Vector3.zero);
+        }
+
+        _leftHandPositionAve = Vector3.zero;
+        _rightHandPositionAve = Vector3.zero;
+        _leftHandList = new List<Vector3>();
+        _rightHandList = new List<Vector3>();
+        for (int i = 0; i < MAX_HAND_SMOOTHING; i++) {
+            _leftHandList.Add(Vector3.zero);
+            _rightHandList.Add(Vector3.zero);
         }
     }
 
@@ -776,51 +793,95 @@ public class MainCaera : MonoBehaviour {
         }
     }
 
-    void calcHandPosture(Vector3 handCircle, GameObject go, ref Vector3 positionAve) {
-        // 手の半径は顏の半分
-        var calibratedHandPosition = new Vector3(_calibratedFacePosition.x, _calibratedFacePosition.y, _calibratedFacePosition.z / 2);
+    Quaternion calcRotationAffectedByControlPoints(Vector3 p, Quaternion currentRotation, GameObject cp) {
+        var targetRotation = cp.transform.rotation;
+
+        // 制御点との距離で影響度を計算
+        var len = (cp.transform.position - p).magnitude;
+        var influence = len / cp.transform.localScale.z; // スケール値を分母(球の半径)にする
+        if (influence > 1.0f) influence = 0;
+        else influence = 1.0f - influence;
+
+        return Quaternion.Lerp(currentRotation, targetRotation, influence);
+    }
+
+    void calcHandPosture(Vector3 handCircle, GameObject go, GameObject handPropes,  ref Vector3 positionAve, ref List<Vector3> handList) {
+        // 手の半径は顏の半分 の更に半分。動体検知では平均を取るため。
+        var calibratedHandPosition = new Vector3(_calibratedFacePosition.x, _calibratedFacePosition.y, _calibratedFacePosition.z * 0.25f);
+
+        if (calibratedHandPosition.z == 0) { return; }
+        if (handCircle.z == 0) { return; }
 
         var handLength = handCircle.z * 2; // 手の直径
-        var standardLength = 0.07f; // 10cm
+        var standardLength = 0.07f; // 7cm
         var pixParM = standardLength / handLength;
         var handPosition = handCircle - calibratedHandPosition;
         handPosition.y *= -1;
         handPosition *= pixParM;
 
         if (calibratedHandPosition.z < handCircle.z) {
-            var radiusRatio = handCircle.z / (calibratedHandPosition.z + 1); // 1.0～2.0
-            var distance = radiusRatio - 1.0f;
-            handPosition.z = (-distance * 0.3f) - 0.3f; // 手の長さ60㎝ 30cmはオフセット
+            var radiusRatio = handCircle.z / (calibratedHandPosition.z + 1);
+            var distance = (radiusRatio - 1) * 0.6f; // ゼロ基準してから 0～60cm
+            handPosition.z = -distance;
+            //var radiusRatio = handCircle.z / (calibratedHandPosition.z + 1); // 1.0～2.0
+            //var distance = radiusRatio - 1.0f;
+            //handPosition.z = (-distance * 0.3f) - 0.3f; // 手の長さ60㎝ 30cmはオフセット
         }
         else {
             handPosition.z = 0;
         }
 
-        // 大きく鵜g書いてみるテスト
-        handPosition.x *= 2;
-        handPosition.y *= 2;
+        // 大きく動かしてみるテスト
+        handPosition.x *= 1.1f;
+        handPosition.y *= 1.1f;
+        handPosition.z *= 0.3f;
 
         // オフセット適用
         handPosition.y += 1.3f;
+        handPosition.z += -0.3f; // 30㎝オフセット 
 
         // スムージング
         float smoothingRatio = 1.0f / _handSmoothingLevel;
-        float radiusSmoothigRatio = 1.0f / (_handSmoothingLevel * 1);
+        float radiusSmoothigRatio = 1.0f / (_handSmoothingLevel * 2);
         positionAve.x = (positionAve.x * (1.0f - smoothingRatio)) + (handPosition.x * smoothingRatio);
         positionAve.y = (positionAve.y * (1.0f - smoothingRatio)) + (handPosition.y * smoothingRatio);
         positionAve.z = (positionAve.z * (1.0f - radiusSmoothigRatio)) + (handPosition.z * radiusSmoothigRatio);
         go.transform.position = positionAve;
+
+
+        //smooth(ref handPosition, handList, _handSmoothingLevel);
+        //go.transform.position = handPosition;
+
+
+
+        // 手の向きを計算
+        handPropes.transform.position = _head.transform.position;
+        var C = handPropes.transform.Find("C").gameObject;
+        var F = handPropes.transform.Find("F").gameObject;
+        var L = handPropes.transform.Find("L").gameObject;
+        var T = handPropes.transform.Find("T").gameObject;
+        var B = handPropes.transform.Find("B").gameObject;
+
+        var p = go.transform.position;
+        var rot = C.transform.rotation;
+        rot = calcRotationAffectedByControlPoints(p, rot, F);
+        rot = calcRotationAffectedByControlPoints(p, rot, L);
+        rot = calcRotationAffectedByControlPoints(p, rot, T);
+        rot = calcRotationAffectedByControlPoints(p, rot, B);
+
+        go.transform.rotation = rot;
     }
 
     void trackingHandPoints() {
         Vector3 leftCircle;
         Vector3 rightCircle;
         SMT.getHandPoints(out leftCircle, out rightCircle);
-        if (SMT.isLeftHandDetected()) {
-            calcHandPosture(leftCircle, _leftHand, ref _leftHandPositionAve);
+        {//if (SMT.isLeftHandDetected()) {
+            calcHandPosture(leftCircle, _leftHand, _leftHandPropes, ref _leftHandPositionAve, ref _leftHandList);
         }
-        if (SMT.isRightHandDetected()) {
-            calcHandPosture(rightCircle, _rightHand, ref _rightHandPositionAve);
+
+        {// if (SMT.isRightHandDetected()) {
+            calcHandPosture(rightCircle, _rightHand, _rightHandPropes, ref _rightHandPositionAve, ref _rightHandList);
         }
     }
 
@@ -829,7 +890,7 @@ public class MainCaera : MonoBehaviour {
         // バモキャキャリブレーション用に現在の頭の位置を基準にTポーズで固定
         if (_isForcedTPose) {
             // 左手
-            var leftOffset = new Vector3(0.8f, -0.2f, 0.2f);
+            var leftOffset = new Vector3(0.8f, -0.2f, 0);
             leftOffset = _head.transform.rotation * leftOffset;
             _leftHand.transform.position = _head.transform.position + leftOffset;
             _leftHand.transform.rotation = _head.transform.rotation;
@@ -838,7 +899,7 @@ public class MainCaera : MonoBehaviour {
             _calibratedLeftHandRotation = _leftHand.transform.rotation;
 
             // 右手
-            var rightOffset = new Vector3(-0.8f, -0.2f, 0.2f);
+            var rightOffset = new Vector3(-0.8f, -0.2f, 0);
             rightOffset = _head.transform.rotation * rightOffset;
             _rightHand.transform.position = _head.transform.position + rightOffset;
             _rightHand.transform.rotation = _head.transform.rotation;

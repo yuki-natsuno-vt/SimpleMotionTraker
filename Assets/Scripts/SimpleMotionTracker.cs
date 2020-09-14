@@ -48,9 +48,9 @@ public class SMT
     [DllImport("SimpleMotionTracker")]
     private static extern void SMT_setIrisThresh(int thresh);
     [DllImport("SimpleMotionTracker")]
-    private static extern void SMT_setMinHandTranslationThreshold(int thresh);
+    private static extern void SMT_setMinHandTranslationThreshold(float thresh);
     [DllImport("SimpleMotionTracker")]
-    private static extern void SMT_setMaxHandTranslationThreshold(int thresh);
+    private static extern void SMT_setMaxHandTranslationThreshold(float thresh);
     [DllImport("SimpleMotionTracker")]
     private static extern void SMT_setHandUndetectedDuration(int msec);
     [DllImport("SimpleMotionTracker")]
@@ -161,11 +161,11 @@ public class SMT
         SMT_setIrisThresh(thresh);
     }
 
-    public static void setMinHandTranslationThreshold(int thresh) {
+    public static void setMinHandTranslationThreshold(float thresh) {
         SMT_setMinHandTranslationThreshold(thresh);
     }
 
-    public static void setMaxHandTranslationThreshold(int thresh) {
+    public static void setMaxHandTranslationThreshold(float thresh) {
         SMT_setMaxHandTranslationThreshold(thresh);
     }
 
