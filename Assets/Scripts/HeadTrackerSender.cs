@@ -100,7 +100,7 @@ public class HeadTrackerSender : MonoBehaviour {
         if (_useEyeTracking) {
             if (_lookAt != null) {
                 var p = _lookAt.transform.localPosition;
-                client.Send("/VMC/Ext/Set/Eye", 1, p.x, p.y, p.z);
+                client.Send("/VMC/Ext/Set/Eye", 1, -p.x, p.y, p.z);
             }
         }
 
