@@ -114,6 +114,8 @@ public class MainCaera : MonoBehaviour {
     float _handStandardPoseMergeDelay = 3.0f;
     float _leftHandStandardPoseMergeDelayStartTime = 0;
     float _rightHandStandardPoseMergeDelayStartTime = 0;
+    Vector3 _leftHandPositionBackup = Vector3.zero;
+    Vector3 _rightHandPositionBackup = Vector3.zero;
 
     const int MAX_SMOOTHING_LEVEL = 30;
     int _smoothingLevel = 10;
@@ -682,24 +684,24 @@ public class MainCaera : MonoBehaviour {
         }
     }
 
-    void calcStandardHandPose(out Vector3 leftPos, out Quaternion leftRot, out Vector3 rightPos, out Quaternion rightRot) {
+    void calcStandardHandPose(out Vector3 leftPos, out Quaternion leftRot, out Vector3 rightPos, out Quaternion rightRot, out Quaternion headRot) {
         // 頭に合わせて腕の位置を調整
         var headRotationEuler = halfAngleVector3(_head.transform.eulerAngles);
         headRotationEuler.x = headRotationEuler.x / 3;
         headRotationEuler.y = headRotationEuler.y / 2;
         headRotationEuler.z = headRotationEuler.z / 3;
-        var headRotation = Quaternion.Euler(headRotationEuler);
+        headRot = Quaternion.Euler(headRotationEuler);
         // 左手
         var leftOffset = new Vector3(0.4f, -0.8f, -0.1f);
-        leftOffset = headRotation * leftOffset;
+        leftOffset = headRot * leftOffset;
         leftPos = _head.transform.position + leftOffset;
-        leftRot = headRotation * Quaternion.Euler(-25, 45, -67);
+        leftRot = headRot * Quaternion.Euler(-25, 45, -67);
 
         // 右手
         var rightOffset = new Vector3(-0.4f, -0.8f, -0.1f);
-        rightOffset = headRotation * rightOffset;
+        rightOffset = headRot * rightOffset;
         rightPos = _head.transform.position + rightOffset;
-        rightRot = headRotation * Quaternion.Euler(-25, -45, 67);
+        rightRot = headRot * Quaternion.Euler(-25, -45, 67);
     }
 
     void setStandardHandPose() {
@@ -707,7 +709,8 @@ public class MainCaera : MonoBehaviour {
         Quaternion leftRot;
         Vector3 rightPos;
         Quaternion rightRot;
-        calcStandardHandPose(out leftPos, out leftRot, out rightPos, out rightRot);
+        Quaternion headRot;
+        calcStandardHandPose(out leftPos, out leftRot, out rightPos, out rightRot, out headRot);
 
         _leftHand.transform.position = leftPos;
         _leftHand.transform.rotation = leftRot;
@@ -977,13 +980,16 @@ public class MainCaera : MonoBehaviour {
         SMT.getHandPoints(out leftCircle, out rightCircle);
         bool isLeftHandDetected = SMT.isLeftHandDetected();
         bool isRightHandDetected = SMT.isRightHandDetected();
+        bool isLeftHandDown = SMT.isLeftHandDown();
+        bool isRightHandDown = SMT.isRightHandDown();
 
         // 動体を見失った時に元の姿勢に戻す為の値
         Vector3 leftStandardPos;
         Quaternion leftStandardRot;
         Vector3 rightStandardPos;
         Quaternion rightStandardRot;
-        calcStandardHandPose(out leftStandardPos, out leftStandardRot, out rightStandardPos, out rightStandardRot);
+        Quaternion headRot;
+        calcStandardHandPose(out leftStandardPos, out leftStandardRot, out rightStandardPos, out rightStandardRot, out headRot);
         float ratioAcceleration = 0.005f;
 
         if (_mirror == -1) {
@@ -995,14 +1001,24 @@ public class MainCaera : MonoBehaviour {
             var detected = isLeftHandDetected;
             isLeftHandDetected = isRightHandDetected;
             isRightHandDetected = detected;
+
+            var down = isLeftHandDown;
+            isLeftHandDown = isRightHandDown;
+            isRightHandDown = down;
         }
 
         if (isLeftHandDetected) {
             calcHandPosture(leftCircle, _leftHand, _leftHandPropes, ref _leftHandPositionAve, ref _leftHandList);
             _leftHandStandardPoseMergeRatio = 0;
             _leftHandStandardPoseMergeDelayStartTime = Time.time;
+            _leftHandPositionBackup = _leftHand.transform.position - _head.transform.position;
         }
         else {
+            if (isLeftHandDown) {
+                _leftHandStandardPoseMergeDelayStartTime -= _handStandardPoseMergeDelay;
+                if (_leftHandStandardPoseMergeDelayStartTime < 0) { _leftHandStandardPoseMergeDelayStartTime = 0; }
+                if (_leftHandStandardPoseMergeRatio < 0.1f) { _leftHandStandardPoseMergeRatio = 0.1f; }
+            }
             if (Time.time - _leftHandStandardPoseMergeDelayStartTime > _handStandardPoseMergeDelay) {
                 var pos = _leftHand.transform.position;
                 var rot = _leftHand.transform.rotation;
@@ -1011,14 +1027,24 @@ public class MainCaera : MonoBehaviour {
                 _leftHandStandardPoseMergeRatio += ratioAcceleration;
                 if (_leftHandStandardPoseMergeRatio > 1) { _leftHandStandardPoseMergeRatio = 1; }
             }
+            else {
+                _leftHand.transform.position = (headRot * _leftHandPositionBackup) + _head.transform.position;
+            }
         }
+
 
         if (isRightHandDetected) {
             calcHandPosture(rightCircle, _rightHand, _rightHandPropes, ref _rightHandPositionAve, ref _rightHandList);
             _rightHandStandardPoseMergeRatio = 0;
             _rightHandStandardPoseMergeDelayStartTime = Time.time;
+            _rightHandPositionBackup = _rightHand.transform.position - _head.transform.position;
         }
         else {
+            if (isRightHandDown) {
+                _rightHandStandardPoseMergeDelayStartTime -= _handStandardPoseMergeDelay;
+                if (_rightHandStandardPoseMergeDelayStartTime < 0) { _rightHandStandardPoseMergeDelayStartTime = 0; }
+                if (_rightHandStandardPoseMergeRatio < 0.1f) { _rightHandStandardPoseMergeRatio = 0.1f; }
+            }
             if (Time.time - _rightHandStandardPoseMergeDelayStartTime > _handStandardPoseMergeDelay) {
                 var pos = _rightHand.transform.position;
                 var rot = _rightHand.transform.rotation;
@@ -1026,6 +1052,9 @@ public class MainCaera : MonoBehaviour {
                 _rightHand.transform.rotation = Quaternion.Lerp(rot, rightStandardRot, _rightHandStandardPoseMergeRatio);
                 _rightHandStandardPoseMergeRatio += ratioAcceleration;
                 if (_rightHandStandardPoseMergeRatio > 1) { _rightHandStandardPoseMergeRatio = 1; }
+            }
+            else {
+                _rightHand.transform.position = (headRot * _rightHandPositionBackup) + _head.transform.position;
             }
         }
     }

@@ -58,6 +58,10 @@ public class SMT
     [DllImport("SimpleMotionTracker")]
     private static extern bool SMT_isRightHandDetected();
     [DllImport("SimpleMotionTracker")]
+    private static extern bool SMT_isLeftHandDown();
+    [DllImport("SimpleMotionTracker")]
+    private static extern bool SMT_isRightHandDown();
+    [DllImport("SimpleMotionTracker")]
     private static extern void SMT_getHandPoints(System.IntPtr outArray);
     [DllImport("SimpleMotionTracker")]
     private static extern int SMT_getErrorCode();
@@ -179,6 +183,14 @@ public class SMT
 
     public static bool isRightHandDetected() {
         return SMT_isRightHandDetected();
+    }
+
+    public static bool isLeftHandDown() {
+        return SMT_isLeftHandDown();
+    }
+
+    public static bool isRightHandDown() {
+        return SMT_isRightHandDown();
     }
 
     /// <summary>
