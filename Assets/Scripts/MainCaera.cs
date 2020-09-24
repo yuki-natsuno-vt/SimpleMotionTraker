@@ -118,6 +118,8 @@ public class MainCaera : MonoBehaviour {
     float _rightHandStandardPoseMergeDelayStartTime = 0;
     Vector3 _leftHandPositionBackup = Vector3.zero;
     Vector3 _rightHandPositionBackup = Vector3.zero;
+    int _leftHandSmoothingDelay = 0;
+    int _rightHandSmoothingDelay = 0;
 
     const int MAX_SMOOTHING_LEVEL = 30;
     int _smoothingLevel = 10;
@@ -1046,7 +1048,11 @@ public class MainCaera : MonoBehaviour {
             isRightHandDown = down;
         }
 
-        if (isLeftHandDetected) {
+        if (isLeftHandDetected || _leftHandSmoothingDelay < _smoothingLevel) {
+            // 非検知の場合でもスムージングのフレーム数だけ更新を続ける
+            if (isRightHandDetected) { _leftHandSmoothingDelay = 0; }
+            else { _leftHandSmoothingDelay += 1; }
+
             calcHandPosture(leftCircle, _leftHand, _leftHandPropes, ref _leftHandPositionAve, ref _leftHandList, _handOffset.x);
             _leftHandStandardPoseMergeRatio = 0;
             _leftHandStandardPoseMergeDelayStartTime = Time.time;
@@ -1072,7 +1078,11 @@ public class MainCaera : MonoBehaviour {
         }
 
 
-        if (isRightHandDetected) {
+        if (isRightHandDetected || _rightHandSmoothingDelay < _smoothingLevel) {
+            // 非検知の場合でもスムージングのフレーム数だけ更新を続ける
+            if (isRightHandDetected) { _rightHandSmoothingDelay = 0; }
+            else { _rightHandSmoothingDelay += 1; }
+
             calcHandPosture(rightCircle, _rightHand, _rightHandPropes, ref _rightHandPositionAve, ref _rightHandList, -_handOffset.x);
             _rightHandStandardPoseMergeRatio = 0;
             _rightHandStandardPoseMergeDelayStartTime = Time.time;
