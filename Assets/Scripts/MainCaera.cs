@@ -42,6 +42,8 @@ public class MainCaera : MonoBehaviour {
     [SerializeField] Toggle _useHandTrackingToggle;
     [SerializeField] InputField _handMovingThresholdMinInputField;
     [SerializeField] InputField _handMovingThresholdMaxInputField;
+    [SerializeField] InputField _handUndetectedDurationInputField;
+    [SerializeField] InputField _handOffsetXInputField;
     [SerializeField] InputField _handOffsetYInputField;
     [SerializeField] InputField _handOffsetZInputField;
     [SerializeField] InputField _handTranslationMagnificationXInputField;
@@ -111,7 +113,7 @@ public class MainCaera : MonoBehaviour {
     float _handStandardPoseMergeRatioAcceleration = 0.005f;
     float _leftHandStandardPoseMergeRatio = 0.0f;
     float _rightHandStandardPoseMergeRatio = 0.0f;
-    float _handStandardPoseMergeDelay = 3.0f;
+    float _handStandardPoseMergeDelay = 5.0f;
     float _leftHandStandardPoseMergeDelayStartTime = 0;
     float _rightHandStandardPoseMergeDelayStartTime = 0;
     Vector3 _leftHandPositionBackup = Vector3.zero;
@@ -132,6 +134,13 @@ public class MainCaera : MonoBehaviour {
     int _port = 0;
 
     bool _isCaptureShown = false;
+
+    // 軸の種類
+    enum Axis {
+        X,
+        Y,
+        Z,
+    }
 
     public void OnUseARMarker() {
         _useARMarker = !_useARMarker;
@@ -256,6 +265,15 @@ public class MainCaera : MonoBehaviour {
         SMT.setMaxHandTranslationThreshold(float.Parse(_handMovingThresholdMaxInputField.text));
     }
 
+    public void OnChangeHandUndetectedDuration() {
+        _handStandardPoseMergeDelay = float.Parse(_handUndetectedDurationInputField.text);
+        SMT.setHandUndetectedDuration((int)(_handStandardPoseMergeDelay * 1000));
+    }
+
+    public void OnChangeHandOffsetX() {
+        _handOffset.x = float.Parse(_handOffsetXInputField.text);
+    }
+
     public void OnChangeHandOffsetY() {
         _handOffset.y = float.Parse(_handOffsetYInputField.text);
     }
@@ -312,6 +330,7 @@ public class MainCaera : MonoBehaviour {
 
         OnChangeHandMovingThresholdMin();
         OnChangeHandMovingThresholdMax();
+        OnChangeHandUndetectedDuration();
     }
 
     public void OnChangeMirror() {
@@ -360,6 +379,7 @@ public class MainCaera : MonoBehaviour {
         p.useHandTracking = _useHandTracking;
         p.handMovingThresholdMin = float.Parse(_handMovingThresholdMinInputField.text);
         p.handMovingThresholdMax = float.Parse(_handMovingThresholdMaxInputField.text);
+        p.handUndetectedDuration = float.Parse(_handUndetectedDurationInputField.text);
         p.handOffset = _handOffset;
         p.handTranslationMagnifications = _handTranslationMagnifications;
         p.smoothingLevel = _smoothingLevel;
@@ -405,7 +425,10 @@ public class MainCaera : MonoBehaviour {
         _useHandTrackingToggle.isOn = p.useHandTracking;
         _handMovingThresholdMinInputField.text = p.handMovingThresholdMin.ToString();
         _handMovingThresholdMaxInputField.text = p.handMovingThresholdMax.ToString();
-        _handOffset = p.handOffset;
+        _handUndetectedDurationInputField.text = p.handUndetectedDuration.ToString();
+        _handOffsetXInputField.text = p.handOffset.x.ToString();
+        _handOffsetYInputField.text = p.handOffset.y.ToString();
+        _handOffsetZInputField.text = p.handOffset.z.ToString();
         _handTranslationMagnifications = p.handTranslationMagnifications;
         _smoothingLevelInputField.text = p.smoothingLevel.ToString();
         _autoAdjustmentInputField.text = p.autoAdjustmentRatio.ToString();
@@ -452,6 +475,8 @@ public class MainCaera : MonoBehaviour {
         OnChangeUseHandTracking();
         OnChangeHandMovingThresholdMin();
         OnChangeHandMovingThresholdMax();
+        OnChangeHandUndetectedDuration();
+        OnChangeHandOffsetX();
         OnChangeHandOffsetY();
         OnChangeHandOffsetZ();
         OnChangeHandTranslationMagnificationX();
@@ -550,6 +575,8 @@ public class MainCaera : MonoBehaviour {
         _useHandTrackingToggle.isOn = false;
         _handMovingThresholdMinInputField.text = "0.05";
         _handMovingThresholdMaxInputField.text = "3.0";
+        _handUndetectedDurationInputField.text = "5.0";
+        _handOffsetXInputField.text = "0.0";
         _handOffsetYInputField.text = "0.0";
         _handOffsetZInputField.text = "-0.30";
         _handTranslationMagnificationXInputField.text = "1.0";
@@ -893,27 +920,42 @@ public class MainCaera : MonoBehaviour {
         }
     }
 
-    Quaternion calcRotationAffectedByControlPoints(Vector3 p, Quaternion currentRotation, GameObject cp) {
+    Quaternion calcRotationAffectedByControlPoints(Vector3 p, Quaternion currentRotation, GameObject cp, Axis axis) {
+        float from = 0;
+        float to = 0;
+        switch (axis) {
+            case Axis.X:
+                from = p.x;
+                to = cp.transform.position.x;
+                break;
+            case Axis.Y:
+                from = p.y;
+                to = cp.transform.position.y;
+                break;
+            case Axis.Z:
+                from = p.z;
+                to = cp.transform.position.z;
+                break;
+        }
+
         var targetRotation = cp.transform.rotation;
 
         // 制御点との距離で影響度を計算
-        var len = (cp.transform.position - p).magnitude;
+        var len = Mathf.Abs(to - from);
         var influence = len / cp.transform.localScale.z; // スケール値を分母(球の半径)にする
-        if (influence > 1.0f) influence = 0;
-        else influence = 1.0f - influence;
-
-        return Quaternion.Lerp(currentRotation, targetRotation, influence);
+        if (influence > 1.0f) { influence = 1.0f; }
+        return Quaternion.Lerp(targetRotation, currentRotation, influence);
     }
 
-    void calcHandPosture(Vector3 handCircle, GameObject go, GameObject handPropes,  ref Vector3 positionAve, ref List<Vector3> handList) {
+    void calcHandPosture(Vector3 handCircle, GameObject go, GameObject handPropes,  ref Vector3 positionAve, ref List<Vector3> handList, float handOffsetX) {
         // 手の半径は顏の半分 の更に半分。動体検知では平均を取るため。
         var calibratedHandPosition = new Vector3(_calibratedFacePosition.x, _calibratedFacePosition.y, _calibratedFacePosition.z * 0.25f);
 
         if (calibratedHandPosition.z == 0) { return; }
         if (handCircle.z == 0) { return; }
-
+        
         var handLength = handCircle.z * 2; // 手の直径
-        var standardLength = 0.07f; // 7cm
+        var standardLength = 0.06f; // 6cm
         var pixParM = standardLength / handLength;
         var handPosition = handCircle - calibratedHandPosition;
         handPosition.y *= -1;
@@ -923,9 +965,6 @@ public class MainCaera : MonoBehaviour {
             var radiusRatio = handCircle.z / (calibratedHandPosition.z + 1);
             var distance = (radiusRatio - 1) * 0.6f; // ゼロ基準してから 0～60cm
             handPosition.z = -distance;
-            //var radiusRatio = handCircle.z / (calibratedHandPosition.z + 1); // 1.0～2.0
-            //var distance = radiusRatio - 1.0f;
-            //handPosition.z = (-distance * 0.3f) - 0.3f; // 手の長さ60㎝ 30cmはオフセット
         }
         else {
             handPosition.z = 0;
@@ -937,6 +976,7 @@ public class MainCaera : MonoBehaviour {
         handPosition.z *= _handTranslationMagnifications.z;
 
         // オフセット適用
+        handPosition.x += handOffsetX;
         handPosition.y += _handOffset.y + 1.3f;
         handPosition.z += _handOffset.z + _head.transform.position.z; 
 
@@ -954,24 +994,23 @@ public class MainCaera : MonoBehaviour {
         //smooth(ref handPosition, handList, _handSmoothingLevel);
         //go.transform.position = handPosition;
 
-
-
         // 手の向きを計算
         handPropes.transform.position = _head.transform.position;
         var C = handPropes.transform.Find("C").gameObject;
         var F = handPropes.transform.Find("F").gameObject;
-        var L = handPropes.transform.Find("L").gameObject;
+        var O = handPropes.transform.Find("O").gameObject;
         var T = handPropes.transform.Find("T").gameObject;
         var B = handPropes.transform.Find("B").gameObject;
 
         var p = go.transform.position;
         var rot = C.transform.rotation;
-        rot = calcRotationAffectedByControlPoints(p, rot, F);
-        rot = calcRotationAffectedByControlPoints(p, rot, L);
-        rot = calcRotationAffectedByControlPoints(p, rot, T);
-        rot = calcRotationAffectedByControlPoints(p, rot, B);
+        rot = calcRotationAffectedByControlPoints(p, rot, F, Axis.Z);
+        rot = calcRotationAffectedByControlPoints(p, rot, O, Axis.X);
+        rot = calcRotationAffectedByControlPoints(p, rot, T, Axis.Y);
+        rot = calcRotationAffectedByControlPoints(p, rot, B, Axis.Y);
 
         go.transform.rotation = rot;
+        
     }
 
     void trackingHandPoints() {
@@ -1008,7 +1047,7 @@ public class MainCaera : MonoBehaviour {
         }
 
         if (isLeftHandDetected) {
-            calcHandPosture(leftCircle, _leftHand, _leftHandPropes, ref _leftHandPositionAve, ref _leftHandList);
+            calcHandPosture(leftCircle, _leftHand, _leftHandPropes, ref _leftHandPositionAve, ref _leftHandList, _handOffset.x);
             _leftHandStandardPoseMergeRatio = 0;
             _leftHandStandardPoseMergeDelayStartTime = Time.time;
             _leftHandPositionBackup = _leftHand.transform.position - _head.transform.position;
@@ -1034,7 +1073,7 @@ public class MainCaera : MonoBehaviour {
 
 
         if (isRightHandDetected) {
-            calcHandPosture(rightCircle, _rightHand, _rightHandPropes, ref _rightHandPositionAve, ref _rightHandList);
+            calcHandPosture(rightCircle, _rightHand, _rightHandPropes, ref _rightHandPositionAve, ref _rightHandList, -_handOffset.x);
             _rightHandStandardPoseMergeRatio = 0;
             _rightHandStandardPoseMergeDelayStartTime = Time.time;
             _rightHandPositionBackup = _rightHand.transform.position - _head.transform.position;

@@ -20,6 +20,7 @@ public class Parameter {
     public bool useHandTracking;
     public float handMovingThresholdMin;
     public float handMovingThresholdMax;
+    public float handUndetectedDuration;
     public Vector3 handOffset;
     public Vector3 handTranslationMagnifications;
     public int smoothingLevel;
