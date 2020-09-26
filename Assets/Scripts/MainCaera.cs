@@ -61,6 +61,13 @@ public class MainCaera : MonoBehaviour {
     [SerializeField] InputField _uOSCInputField;
     [SerializeField] Toggle _showCaptureImageToggle;
 
+    [SerializeField] InputField _vrPlayAreaOffsetTranslationXInputField;
+    [SerializeField] InputField _vrPlayAreaOffsetTranslationYInputField;
+    [SerializeField] InputField _vrPlayAreaOffsetTranslationZInputField;
+    [SerializeField] InputField _vrPlayAreaOffsetRotationXInputField;
+    [SerializeField] InputField _vrPlayAreaOffsetRotationYInputField;
+    [SerializeField] InputField _vrPlayAreaOffsetRotationZInputField;
+
     int _zAxisFlipFrameCount = 0; // フリップ発生フレーム数.
 
     int _cameraId = 0;
@@ -136,6 +143,10 @@ public class MainCaera : MonoBehaviour {
     int _port = 0;
 
     bool _isCaptureShown = false;
+
+
+    Vector3 _vrPlayAreaOffsetTranslation = Vector3.zero;
+    Vector3 _vrPlayAreaOffsetRotation = Vector3.zero;
 
     // 軸の種類
     enum Axis {
@@ -355,6 +366,46 @@ public class MainCaera : MonoBehaviour {
         SMT.setCaptureShown(_isCaptureShown);
     }
 
+    private void applyVRPlayAreaOffset() {
+        _head.GetComponent<HeadTrackerSender>()._vrPlayAreaOffsetTranslation = _vrPlayAreaOffsetTranslation;
+        _leftHand.GetComponent<TrackerSender>()._vrPlayAreaOffsetTranslation = _vrPlayAreaOffsetTranslation;
+        _rightHand.GetComponent<TrackerSender>()._vrPlayAreaOffsetTranslation = _vrPlayAreaOffsetTranslation;
+
+        _head.GetComponent<HeadTrackerSender>()._vrPlayAreaOffsetRotation = _vrPlayAreaOffsetRotation;
+        _leftHand.GetComponent<TrackerSender>()._vrPlayAreaOffsetRotation = _vrPlayAreaOffsetRotation;
+        _rightHand.GetComponent<TrackerSender>()._vrPlayAreaOffsetRotation = _vrPlayAreaOffsetRotation;
+    }
+
+    public void OnChangeVRPlayAreaOffsetTranslationX() {
+        _vrPlayAreaOffsetTranslation.x = float.Parse(_vrPlayAreaOffsetTranslationXInputField.text);
+        applyVRPlayAreaOffset();
+    }
+
+    public void OnChangeVRPlayAreaOffsetTranslationY() {
+        _vrPlayAreaOffsetTranslation.y = float.Parse(_vrPlayAreaOffsetTranslationYInputField.text);
+        applyVRPlayAreaOffset();
+    }
+
+    public void OnChangeVRPlayAreaOffsetTranslationZ() {
+        _vrPlayAreaOffsetTranslation.z = float.Parse(_vrPlayAreaOffsetTranslationZInputField.text);
+        applyVRPlayAreaOffset();
+    }
+
+    public void OnChangeVRPlayAreaOffsetRotationX() {
+        _vrPlayAreaOffsetRotation.x = float.Parse(_vrPlayAreaOffsetRotationXInputField.text);
+        applyVRPlayAreaOffset();
+    }
+
+    public void OnChangeVRPlayAreaOffsetRotationY() {
+        _vrPlayAreaOffsetRotation.y = float.Parse(_vrPlayAreaOffsetRotationYInputField.text);
+        applyVRPlayAreaOffset();
+    }
+
+    public void OnChangeVRPlayAreaOffsetRotationZ() {
+        _vrPlayAreaOffsetRotation.z = float.Parse(_vrPlayAreaOffsetRotationZInputField.text);
+        applyVRPlayAreaOffset();
+    }
+
     public void OnClickSave() {
         var fileName = SMT.getSaveFileName();
         if (string.IsNullOrEmpty(fileName)) {
@@ -389,6 +440,8 @@ public class MainCaera : MonoBehaviour {
         p.autoAdjustmentDelay = _autoAdjustmentDelay;
         p.mirror = _mirror;
         p.port = _port;
+        p.vrPlayAreaOffsetTranslation = _vrPlayAreaOffsetTranslation;
+        p.vrPlayAreaOffsetRotation = _vrPlayAreaOffsetRotation;
 
         string json = JsonUtility.ToJson(p);
         File.WriteAllText(fileName, json);
@@ -437,7 +490,13 @@ public class MainCaera : MonoBehaviour {
         _autoAdjustmentDelayInputField.text = p.autoAdjustmentDelay.ToString();
         _mirrorToggle.isOn = (p.mirror == -1);
         _uOSCInputField.text = p.port.ToString();
-        
+        _vrPlayAreaOffsetTranslationXInputField.text = p.vrPlayAreaOffsetTranslation.x.ToString();
+        _vrPlayAreaOffsetTranslationYInputField.text = p.vrPlayAreaOffsetTranslation.y.ToString();
+        _vrPlayAreaOffsetTranslationZInputField.text = p.vrPlayAreaOffsetTranslation.z.ToString();
+        _vrPlayAreaOffsetRotationXInputField.text = p.vrPlayAreaOffsetRotation.x.ToString();
+        _vrPlayAreaOffsetRotationYInputField.text = p.vrPlayAreaOffsetRotation.y.ToString();
+        _vrPlayAreaOffsetRotationZInputField.text = p.vrPlayAreaOffsetRotation.z.ToString();
+
         int i = 0;
         foreach (var item in _videoDeviceList.options) {
             if (item.text == p.deviceName) {
@@ -491,6 +550,12 @@ public class MainCaera : MonoBehaviour {
         OnChangeVideoDeviceList();
         OnChangeMirror();
         OnChangedOSCPort();
+        OnChangeVRPlayAreaOffsetTranslationX();
+        OnChangeVRPlayAreaOffsetTranslationY();
+        OnChangeVRPlayAreaOffsetTranslationZ();
+        OnChangeVRPlayAreaOffsetRotationX();
+        OnChangeVRPlayAreaOffsetRotationY();
+        OnChangeVRPlayAreaOffsetRotationZ();
     }
 
     Vector3 halfAngleVector3(Vector3 eulerAngles) {
@@ -595,6 +660,13 @@ public class MainCaera : MonoBehaviour {
         _mirrorToggle.isOn = false;
 
         _uOSCInputField.text = "39540";
+
+        _vrPlayAreaOffsetTranslationXInputField.text = "0";
+        _vrPlayAreaOffsetTranslationYInputField.text = "0";
+        _vrPlayAreaOffsetTranslationZInputField.text = "0";
+        _vrPlayAreaOffsetRotationXInputField.text = "0";
+        _vrPlayAreaOffsetRotationYInputField.text = "180";
+        _vrPlayAreaOffsetRotationZInputField.text = "0";
 
         refreshUI();
 

@@ -35,8 +35,8 @@ public class TrackerSender : MonoBehaviour {
     public GameObject _object;
     public GameObject _lookAt;
 
-    public Vector3 _realityAreaOffsetTrnslation;
-    public Vector3 _realityAreaOffsetRotation;
+    public Vector3 _vrPlayAreaOffsetTranslation;
+    public Vector3 _vrPlayAreaOffsetRotation;
 
     public void ChangePort(int port) {
         if (client == null) {
@@ -82,8 +82,9 @@ public class TrackerSender : MonoBehaviour {
                     break;
             }
             if (name != null && _object != null && _deviceSerial != null) {
-                var pos = _object.transform.position + _realityAreaOffsetTrnslation;
-                var rot = _object.transform.rotation * Quaternion.Euler(_realityAreaOffsetRotation);
+                var offsetRot = Quaternion.Euler(_vrPlayAreaOffsetRotation);
+                var pos = (offsetRot * _object.transform.position) + _vrPlayAreaOffsetTranslation;
+                var rot = offsetRot * _object.transform.rotation;
 
                 client.Send(name,
                     (string)_deviceSerial,

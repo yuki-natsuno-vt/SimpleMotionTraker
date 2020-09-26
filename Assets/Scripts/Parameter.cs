@@ -29,4 +29,6 @@ public class Parameter {
     public string deviceName;
     public float mirror;
     public int port;
+    public Vector3 vrPlayAreaOffsetTranslation;
+    public Vector3 vrPlayAreaOffsetRotation;
 }
