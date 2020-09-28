@@ -484,7 +484,9 @@ public class MainCaera : MonoBehaviour {
         _handOffsetXInputField.text = p.handOffset.x.ToString();
         _handOffsetYInputField.text = p.handOffset.y.ToString();
         _handOffsetZInputField.text = p.handOffset.z.ToString();
-        _handTranslationMagnifications = p.handTranslationMagnifications;
+        _handTranslationMagnificationXInputField.text = p.handTranslationMagnifications.x.ToString();
+        _handTranslationMagnificationYInputField.text = p.handTranslationMagnifications.y.ToString();
+        _handTranslationMagnificationZInputField.text = p.handTranslationMagnifications.z.ToString();
         _smoothingLevelInputField.text = p.smoothingLevel.ToString();
         _autoAdjustmentInputField.text = p.autoAdjustmentRatio.ToString();
         _autoAdjustmentDelayInputField.text = p.autoAdjustmentDelay.ToString();
