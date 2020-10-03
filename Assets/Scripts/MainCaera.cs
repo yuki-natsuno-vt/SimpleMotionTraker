@@ -795,16 +795,16 @@ public class MainCaera : MonoBehaviour {
         headRotationEuler.z = headRotationEuler.z / 3;
         headRot = Quaternion.Euler(headRotationEuler);
         // 左手
-        var leftOffset = new Vector3(0.4f, -0.8f, -0.1f);
+        var leftOffset = new Vector3(0.3f, -0.85f, 0.0f);
         leftOffset = headRot * leftOffset;
         leftPos = _head.transform.position + leftOffset;
-        leftRot = headRot * Quaternion.Euler(-25, 45, -67);
+        leftRot = headRot * Quaternion.Euler(-25, 120, -107);
 
         // 右手
-        var rightOffset = new Vector3(-0.4f, -0.8f, -0.1f);
+        var rightOffset = new Vector3(-0.3f, -0.85f, 0.0f);
         rightOffset = headRot * rightOffset;
         rightPos = _head.transform.position + rightOffset;
-        rightRot = headRot * Quaternion.Euler(-25, -45, 67);
+        rightRot = headRot * Quaternion.Euler(-25, -120, 107);
     }
 
     void setStandardHandPose() {
@@ -927,7 +927,7 @@ public class MainCaera : MonoBehaviour {
             if (faceRotationEuler.z > 75) faceRotationEuler.z = 75;
             
             // オフセット適用
-            facePosition.y += 1.3f;
+            facePosition.y += 1.6f;
 
             smooth(ref faceRotationEuler, _faceRotationList, _smoothingLevel);
             smooth(ref facePosition, _facePositionList, _smoothingLevel);
@@ -1053,7 +1053,7 @@ public class MainCaera : MonoBehaviour {
 
         // オフセット適用
         handPosition.x += handOffsetX;
-        handPosition.y += _handOffset.y + 1.3f;
+        handPosition.y += _handOffset.y + 1.6f;
         handPosition.z += _handOffset.z + _head.transform.position.z; 
 
         // スムージング
@@ -1187,7 +1187,7 @@ public class MainCaera : MonoBehaviour {
         // バモキャキャリブレーション用に現在の頭の位置を基準にTポーズで固定
         if (_isForcedTPose) {
             // 左手
-            var leftOffset = new Vector3(0.8f, -0.2f, 0);
+            var leftOffset = new Vector3(0.8f, -0.2f, 0.0f);
             leftOffset = _head.transform.rotation * leftOffset;
             _leftHand.transform.position = _head.transform.position + leftOffset;
             _leftHand.transform.rotation = _head.transform.rotation;
@@ -1196,7 +1196,7 @@ public class MainCaera : MonoBehaviour {
             _calibratedLeftHandRotation = _leftHand.transform.rotation;
 
             // 右手
-            var rightOffset = new Vector3(-0.8f, -0.2f, 0);
+            var rightOffset = new Vector3(-0.8f, -0.2f, 0.0f);
             rightOffset = _head.transform.rotation * rightOffset;
             _rightHand.transform.position = _head.transform.position + rightOffset;
             _rightHand.transform.rotation = _head.transform.rotation;
