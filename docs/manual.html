@@ -182,6 +182,34 @@
           目の開閉の閾値の最小と最大を設定します。最小以下は全て閉じ、最大以上は全て開き、として扱われます。
         </div>
         <br>
+        <h7>Use Hand Tracking</h7>
+        <div class="indent">
+          手の追跡モードを有効にします。
+        </div>
+        <br>
+        <h7>Hand Moving Threshold</h7>
+        <div class="indent">
+          手の動体検知面積の閾値です。最小、最大を指定します。<br>
+          最小：検知が最小を下回ると追跡を停止します。(デフォルトは0.05)<br>
+          最大：動き始めはこの値を超える量の動体検知面積が必要です。(デフォルトは3.0)
+        </div>
+        <br>
+        <h7>Hand Undetected Duration</h7>
+        <div class="indent">
+          手の動体検知を停止してから完全にリセット状態になるまでの待機時間です。この時間を超えると手を下します。<br>
+        </div>
+        <br>
+        <h7>Hand Offset</h7>
+        <div class="indent">
+          手の位置のオフセットをX,Y,Z軸で指定します<br>
+        </div>
+        <br>
+        <h7>Hand Translation Magnification</h7>
+        <div class="indent">
+          手の平行移動量の倍率です。X,Y,Zそれぞれの軸を指定します。(デフォルトは1.0、1.0、0.3)<br>
+          値を大きくすると少しの動きで手を大きく動かすことが出来ます<br>
+        </div>
+        <br>
         <h7>Smoothing Level</h7>
         <div class="indent">
           検出誤差を抑えるために指定フレーム間の平均値を取ります。値が小さいとクイックに反応しますが、ブレが大きくなります。値が大きいとブレは少ないですが反応が遅くなります。（デフォルトは10）
@@ -227,6 +255,12 @@
         <h7>Save / Load</h7>
         <div class="indent">
           パラメータの設定情報をファイルに保存、ファイルから読み込みます。
+        </div>
+        <br>
+        <h7>VR Play Area Offset Translation / VR Play Area Offset Rotation</h7>
+        <div class="indent">
+          VR機器のプレイエリアとSMTの座標を合わせるための平行移動、回転のオフセットです。<br>
+          位置を合わせることでVR機器とSMTの混成が可能になります。(頭はSMT、手はVRコントローラーなど)<br>
         </div>
       </div>
       <br>

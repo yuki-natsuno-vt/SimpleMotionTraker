@@ -42,8 +42,8 @@ public class HeadTrackerSender : MonoBehaviour {
     public bool _useEyeTracking = false;
     public bool _useEyesBlink = false;
 
-    public Vector3 _realityAreaOffsetTrnslation;
-    public Vector3 _realityAreaOffsetRotation;
+    public Vector3 _vrPlayAreaOffsetTranslation;
+    public Vector3 _vrPlayAreaOffsetRotation;
 
     public void ChangePort(int port) {
         if (client == null) {
@@ -82,8 +82,9 @@ public class HeadTrackerSender : MonoBehaviour {
                     break;
             }
             if (name != null && _object != null && _deviceSerial != null) {
-                var pos = _object.transform.position + _realityAreaOffsetTrnslation;
-                var rot = _object.transform.rotation * Quaternion.Euler(_realityAreaOffsetRotation);
+                var offsetRot = Quaternion.Euler(_vrPlayAreaOffsetRotation);
+                var pos = _object.transform.position + _vrPlayAreaOffsetTranslation;
+                var rot = _object.transform.rotation * offsetRot;
 
                 client.Send(name,
                     (string)_deviceSerial,
@@ -100,7 +101,7 @@ public class HeadTrackerSender : MonoBehaviour {
         if (_useEyeTracking) {
             if (_lookAt != null) {
                 var p = _lookAt.transform.localPosition;
-                client.Send("/VMC/Ext/Set/Eye", 1, p.x, p.y, p.z);
+                client.Send("/VMC/Ext/Set/Eye", 1, -p.x, p.y, p.z);
             }
         }
 

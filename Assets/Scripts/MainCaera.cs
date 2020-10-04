@@ -13,6 +13,8 @@ public class MainCaera : MonoBehaviour {
     [SerializeField] GameObject _leftIris;
     [SerializeField] GameObject _rightIris;
     [SerializeField] GameObject _lookAt;
+    [SerializeField] GameObject _leftHandPropes;
+    [SerializeField] GameObject _rightHandPropes;
 
     [SerializeField] Toggle _forceTPoseToggle;
     [SerializeField] Toggle _useFaceTrackingToggle;
@@ -25,6 +27,7 @@ public class MainCaera : MonoBehaviour {
     [SerializeField] InputField _rotationMagnificationXInputField;
     [SerializeField] InputField _rotationMagnificationYInputField;
     [SerializeField] InputField _rotationMagnificationZInputField;
+
     [SerializeField] Toggle _useEyeTrackingToggle;
     [SerializeField] Toggle _useEyeBlinkToggle;
     [SerializeField] Toggle _useEyeLRSyncToggle;
@@ -35,15 +38,35 @@ public class MainCaera : MonoBehaviour {
     [SerializeField] InputField _irisTranslationMagnificationYInputField;
     [SerializeField] InputField _eyeOpenThresholdMinInputField;
     [SerializeField] InputField _eyeOpenThresholdMaxInputField;
+    
+    [SerializeField] Toggle _useHandTrackingToggle;
+    [SerializeField] InputField _handMovingThresholdMinInputField;
+    [SerializeField] InputField _handMovingThresholdMaxInputField;
+    [SerializeField] InputField _handUndetectedDurationInputField;
+    [SerializeField] InputField _handOffsetXInputField;
+    [SerializeField] InputField _handOffsetYInputField;
+    [SerializeField] InputField _handOffsetZInputField;
+    [SerializeField] InputField _handTranslationMagnificationXInputField;
+    [SerializeField] InputField _handTranslationMagnificationYInputField;
+    [SerializeField] InputField _handTranslationMagnificationZInputField;
+
     [SerializeField] InputField _smoothingLevelInputField;
     [SerializeField] InputField _autoAdjustmentInputField;
     [SerializeField] InputField _autoAdjustmentDelayInputField;
+
     [SerializeField] Dropdown _videoDeviceList;
     [SerializeField] Text _selectedVideoDeviceName;
     [SerializeField] Text _cameraStartButtonText;
     [SerializeField] Toggle _mirrorToggle;
     [SerializeField] InputField _uOSCInputField;
     [SerializeField] Toggle _showCaptureImageToggle;
+
+    [SerializeField] InputField _vrPlayAreaOffsetTranslationXInputField;
+    [SerializeField] InputField _vrPlayAreaOffsetTranslationYInputField;
+    [SerializeField] InputField _vrPlayAreaOffsetTranslationZInputField;
+    [SerializeField] InputField _vrPlayAreaOffsetRotationXInputField;
+    [SerializeField] InputField _vrPlayAreaOffsetRotationYInputField;
+    [SerializeField] InputField _vrPlayAreaOffsetRotationZInputField;
 
     int _zAxisFlipFrameCount = 0; // フリップ発生フレーム数.
 
@@ -85,9 +108,28 @@ public class MainCaera : MonoBehaviour {
     List<Vector3> _leftIrisList;
     List<Vector3> _rightIrisList;
 
+    bool _useHandTracking = false;
+    const int MAX_HAND_SMOOTHING = 30;
+    int _handSmoothingLevel = 10;
+    Vector3 _leftHandPositionAve = Vector3.zero;
+    Vector3 _rightHandPositionAve = Vector3.zero;
+    List<Vector3> _leftHandList;
+    List<Vector3> _rightHandList;
+    Vector3 _handOffset = Vector3.zero;
+    Vector3 _handTranslationMagnifications = Vector3.one;
+    float _handStandardPoseMergeRatioAcceleration = 0.005f;
+    float _leftHandStandardPoseMergeRatio = 0.0f;
+    float _rightHandStandardPoseMergeRatio = 0.0f;
+    float _handStandardPoseMergeDelay = 5.0f;
+    float _leftHandStandardPoseMergeDelayStartTime = 0;
+    float _rightHandStandardPoseMergeDelayStartTime = 0;
+    Vector3 _leftHandPositionBackup = Vector3.zero;
+    Vector3 _rightHandPositionBackup = Vector3.zero;
+    int _leftHandSmoothingDelay = 0;
+    int _rightHandSmoothingDelay = 0;
 
     const int MAX_SMOOTHING_LEVEL = 30;
-    int _smoothingLevel = 3;
+    int _smoothingLevel = 10;
     List<Vector3> _facePositionList;
     List<Vector3> _faceRotationList;
 
@@ -101,6 +143,17 @@ public class MainCaera : MonoBehaviour {
     int _port = 0;
 
     bool _isCaptureShown = false;
+
+
+    Vector3 _vrPlayAreaOffsetTranslation = Vector3.zero;
+    Vector3 _vrPlayAreaOffsetRotation = Vector3.zero;
+
+    // 軸の種類
+    enum Axis {
+        X,
+        Y,
+        Z,
+    }
 
     public void OnUseARMarker() {
         _useARMarker = !_useARMarker;
@@ -212,6 +265,48 @@ public class MainCaera : MonoBehaviour {
         _maxEyeOpenThreshold = float.Parse(_eyeOpenThresholdMaxInputField.text);
     }
 
+    public void OnChangeUseHandTracking() {
+        _useHandTracking = _useHandTrackingToggle.isOn;
+        SMT.setUseHandTracking(_useHandTracking);
+    }
+
+    public void OnChangeHandMovingThresholdMin() {
+        SMT.setMinHandTranslationThreshold(float.Parse(_handMovingThresholdMinInputField.text));
+    }
+
+    public void OnChangeHandMovingThresholdMax() {
+        SMT.setMaxHandTranslationThreshold(float.Parse(_handMovingThresholdMaxInputField.text));
+    }
+
+    public void OnChangeHandUndetectedDuration() {
+        _handStandardPoseMergeDelay = float.Parse(_handUndetectedDurationInputField.text);
+        SMT.setHandUndetectedDuration((int)(_handStandardPoseMergeDelay * 1000));
+    }
+
+    public void OnChangeHandOffsetX() {
+        _handOffset.x = float.Parse(_handOffsetXInputField.text);
+    }
+
+    public void OnChangeHandOffsetY() {
+        _handOffset.y = float.Parse(_handOffsetYInputField.text);
+    }
+
+    public void OnChangeHandOffsetZ() {
+        _handOffset.z = float.Parse(_handOffsetZInputField.text);
+    }
+
+    public void OnChangeHandTranslationMagnificationX() {
+        _handTranslationMagnifications.x = float.Parse(_handTranslationMagnificationXInputField.text);
+    }
+
+    public void OnChangeHandTranslationMagnificationY() {
+        _handTranslationMagnifications.y = float.Parse(_handTranslationMagnificationYInputField.text);
+    }
+
+    public void OnChangeHandTranslationMagnificationZ() {
+        _handTranslationMagnifications.z = float.Parse(_handTranslationMagnificationZInputField.text);
+    }
+
     public void OnChangeSmoothingLevel() {
         _smoothingLevel = Mathf.Clamp(int.Parse(_smoothingLevelInputField.text), 1, MAX_SMOOTHING_LEVEL);
         _smoothingLevelInputField.text = _smoothingLevel.ToString();
@@ -244,6 +339,11 @@ public class MainCaera : MonoBehaviour {
         SMT.setUseARMarker(_useARMarker);
         SMT.setUseFaceTracking(_useFaceTracking);
         SMT.setUseEyeTracking(_useEyeTracking);
+        SMT.setUseHandTracking(_useHandTracking);
+
+        OnChangeHandMovingThresholdMin();
+        OnChangeHandMovingThresholdMax();
+        OnChangeHandUndetectedDuration();
     }
 
     public void OnChangeMirror() {
@@ -264,6 +364,46 @@ public class MainCaera : MonoBehaviour {
     public void OnChangeCaptureShown() {
         _isCaptureShown = _showCaptureImageToggle.isOn;
         SMT.setCaptureShown(_isCaptureShown);
+    }
+
+    private void applyVRPlayAreaOffset() {
+        _head.GetComponent<HeadTrackerSender>()._vrPlayAreaOffsetTranslation = _vrPlayAreaOffsetTranslation;
+        _leftHand.GetComponent<TrackerSender>()._vrPlayAreaOffsetTranslation = _vrPlayAreaOffsetTranslation;
+        _rightHand.GetComponent<TrackerSender>()._vrPlayAreaOffsetTranslation = _vrPlayAreaOffsetTranslation;
+
+        _head.GetComponent<HeadTrackerSender>()._vrPlayAreaOffsetRotation = _vrPlayAreaOffsetRotation;
+        _leftHand.GetComponent<TrackerSender>()._vrPlayAreaOffsetRotation = _vrPlayAreaOffsetRotation;
+        _rightHand.GetComponent<TrackerSender>()._vrPlayAreaOffsetRotation = _vrPlayAreaOffsetRotation;
+    }
+
+    public void OnChangeVRPlayAreaOffsetTranslationX() {
+        _vrPlayAreaOffsetTranslation.x = float.Parse(_vrPlayAreaOffsetTranslationXInputField.text);
+        applyVRPlayAreaOffset();
+    }
+
+    public void OnChangeVRPlayAreaOffsetTranslationY() {
+        _vrPlayAreaOffsetTranslation.y = float.Parse(_vrPlayAreaOffsetTranslationYInputField.text);
+        applyVRPlayAreaOffset();
+    }
+
+    public void OnChangeVRPlayAreaOffsetTranslationZ() {
+        _vrPlayAreaOffsetTranslation.z = float.Parse(_vrPlayAreaOffsetTranslationZInputField.text);
+        applyVRPlayAreaOffset();
+    }
+
+    public void OnChangeVRPlayAreaOffsetRotationX() {
+        _vrPlayAreaOffsetRotation.x = float.Parse(_vrPlayAreaOffsetRotationXInputField.text);
+        applyVRPlayAreaOffset();
+    }
+
+    public void OnChangeVRPlayAreaOffsetRotationY() {
+        _vrPlayAreaOffsetRotation.y = float.Parse(_vrPlayAreaOffsetRotationYInputField.text);
+        applyVRPlayAreaOffset();
+    }
+
+    public void OnChangeVRPlayAreaOffsetRotationZ() {
+        _vrPlayAreaOffsetRotation.z = float.Parse(_vrPlayAreaOffsetRotationZInputField.text);
+        applyVRPlayAreaOffset();
     }
 
     public void OnClickSave() {
@@ -289,11 +429,19 @@ public class MainCaera : MonoBehaviour {
         p.irisTranslationMagnifications = _irisTranslationMagnifications;
         p.maxEyeOpenThreshold = _maxEyeOpenThreshold;
         p.minEyeOpenThreshold = _minEyeOpenThreshold;
+        p.useHandTracking = _useHandTracking;
+        p.handMovingThresholdMin = float.Parse(_handMovingThresholdMinInputField.text);
+        p.handMovingThresholdMax = float.Parse(_handMovingThresholdMaxInputField.text);
+        p.handUndetectedDuration = float.Parse(_handUndetectedDurationInputField.text);
+        p.handOffset = _handOffset;
+        p.handTranslationMagnifications = _handTranslationMagnifications;
         p.smoothingLevel = _smoothingLevel;
         p.autoAdjustmentRatio = _autoAdjustmentRatio;
         p.autoAdjustmentDelay = _autoAdjustmentDelay;
         p.mirror = _mirror;
         p.port = _port;
+        p.vrPlayAreaOffsetTranslation = _vrPlayAreaOffsetTranslation;
+        p.vrPlayAreaOffsetRotation = _vrPlayAreaOffsetRotation;
 
         string json = JsonUtility.ToJson(p);
         File.WriteAllText(fileName, json);
@@ -329,12 +477,28 @@ public class MainCaera : MonoBehaviour {
         _irisTranslationMagnificationYInputField.text = p.irisTranslationMagnifications.y.ToString();
         _eyeOpenThresholdMaxInputField.text = p.maxEyeOpenThreshold.ToString();
         _eyeOpenThresholdMinInputField.text = p.minEyeOpenThreshold.ToString();
+        _useHandTrackingToggle.isOn = p.useHandTracking;
+        _handMovingThresholdMinInputField.text = p.handMovingThresholdMin.ToString();
+        _handMovingThresholdMaxInputField.text = p.handMovingThresholdMax.ToString();
+        _handUndetectedDurationInputField.text = p.handUndetectedDuration.ToString();
+        _handOffsetXInputField.text = p.handOffset.x.ToString();
+        _handOffsetYInputField.text = p.handOffset.y.ToString();
+        _handOffsetZInputField.text = p.handOffset.z.ToString();
+        _handTranslationMagnificationXInputField.text = p.handTranslationMagnifications.x.ToString();
+        _handTranslationMagnificationYInputField.text = p.handTranslationMagnifications.y.ToString();
+        _handTranslationMagnificationZInputField.text = p.handTranslationMagnifications.z.ToString();
         _smoothingLevelInputField.text = p.smoothingLevel.ToString();
         _autoAdjustmentInputField.text = p.autoAdjustmentRatio.ToString();
         _autoAdjustmentDelayInputField.text = p.autoAdjustmentDelay.ToString();
         _mirrorToggle.isOn = (p.mirror == -1);
         _uOSCInputField.text = p.port.ToString();
-        
+        _vrPlayAreaOffsetTranslationXInputField.text = p.vrPlayAreaOffsetTranslation.x.ToString();
+        _vrPlayAreaOffsetTranslationYInputField.text = p.vrPlayAreaOffsetTranslation.y.ToString();
+        _vrPlayAreaOffsetTranslationZInputField.text = p.vrPlayAreaOffsetTranslation.z.ToString();
+        _vrPlayAreaOffsetRotationXInputField.text = p.vrPlayAreaOffsetRotation.x.ToString();
+        _vrPlayAreaOffsetRotationYInputField.text = p.vrPlayAreaOffsetRotation.y.ToString();
+        _vrPlayAreaOffsetRotationZInputField.text = p.vrPlayAreaOffsetRotation.z.ToString();
+
         int i = 0;
         foreach (var item in _videoDeviceList.options) {
             if (item.text == p.deviceName) {
@@ -360,7 +524,7 @@ public class MainCaera : MonoBehaviour {
         OnChangeRotationMagnificationX();
         OnChangeRotationMagnificationY();
         OnChangeRotationMagnificationZ();
-        OnClickCalibrateFacePoints();
+        //OnClickCalibrateFacePoints();
         OnChangeUseEyeTracking();
         OnChangeUseBlink();
         OnChangeLRSync();
@@ -371,12 +535,29 @@ public class MainCaera : MonoBehaviour {
         OnChangeIrisTranslationMagnificationY();
         OnChangeEyeOpenThresholdMin();
         OnChangeEyeOpenThresholdMax();
+        OnChangeUseHandTracking();
+        OnChangeHandMovingThresholdMin();
+        OnChangeHandMovingThresholdMax();
+        OnChangeHandUndetectedDuration();
+        OnChangeHandOffsetX();
+        OnChangeHandOffsetY();
+        OnChangeHandOffsetZ();
+        OnChangeHandTranslationMagnificationX();
+        OnChangeHandTranslationMagnificationY();
+        OnChangeHandTranslationMagnificationZ();
         OnChangeSmoothingLevel();
+        OnChangeUseHandTracking();
         OnChangeAutoAdjustment();
         OnChangeAutoAdjustmentDelay();
         OnChangeVideoDeviceList();
         OnChangeMirror();
         OnChangedOSCPort();
+        OnChangeVRPlayAreaOffsetTranslationX();
+        OnChangeVRPlayAreaOffsetTranslationY();
+        OnChangeVRPlayAreaOffsetTranslationZ();
+        OnChangeVRPlayAreaOffsetRotationX();
+        OnChangeVRPlayAreaOffsetRotationY();
+        OnChangeVRPlayAreaOffsetRotationZ();
     }
 
     Vector3 halfAngleVector3(Vector3 eulerAngles) {
@@ -431,7 +612,8 @@ public class MainCaera : MonoBehaviour {
 
         SMT.setUseARMarker(_useARMarker);
         SMT.setUseFaceTracking(_useFaceTracking);
-        
+        SMT.setUseHandTracking(_useHandTracking);
+
         _calibratedFacePosition = Vector3.zero;
         _calibratedLeftEyePosition = Vector3.zero;
         _calibratedRigthEyePosition = Vector3.zero;
@@ -459,7 +641,20 @@ public class MainCaera : MonoBehaviour {
         _eyeOpenThresholdMinInputField.text = "0.3";
         _eyeOpenThresholdMaxInputField.text = "0.6";
 
-        _smoothingLevelInputField.text = "5";
+        _useHandTrackingToggle.isOn = false;
+        _handMovingThresholdMinInputField.text = "0.05";
+        _handMovingThresholdMaxInputField.text = "3.0";
+        _handUndetectedDurationInputField.text = "5.0";
+        _handOffsetXInputField.text = "0.0";
+        _handOffsetYInputField.text = "0.0";
+        _handOffsetZInputField.text = "-0.30";
+        _handTranslationMagnificationXInputField.text = "1.0";
+        _handTranslationMagnificationYInputField.text = "1.0";
+        _handTranslationMagnificationZInputField.text = "0.3";
+        _leftHandStandardPoseMergeDelayStartTime = Time.time;
+        _rightHandStandardPoseMergeDelayStartTime = Time.time;
+
+        _smoothingLevelInputField.text = "10";
 
         _autoAdjustmentInputField.text = "0.05";
         _autoAdjustmentDelayInputField.text = "2.0";
@@ -467,6 +662,13 @@ public class MainCaera : MonoBehaviour {
         _mirrorToggle.isOn = false;
 
         _uOSCInputField.text = "39540";
+
+        _vrPlayAreaOffsetTranslationXInputField.text = "0";
+        _vrPlayAreaOffsetTranslationYInputField.text = "0";
+        _vrPlayAreaOffsetTranslationZInputField.text = "0";
+        _vrPlayAreaOffsetRotationXInputField.text = "0";
+        _vrPlayAreaOffsetRotationYInputField.text = "180";
+        _vrPlayAreaOffsetRotationZInputField.text = "0";
 
         refreshUI();
 
@@ -489,6 +691,15 @@ public class MainCaera : MonoBehaviour {
         for (int i = 0; i < MAX_EYE_SMOOTHING; i++) {
             _leftEyeList.Add(Vector3.zero);
             _rightEyeList.Add(Vector3.zero);
+        }
+
+        _leftHandPositionAve = Vector3.zero;
+        _rightHandPositionAve = Vector3.zero;
+        _leftHandList = new List<Vector3>();
+        _rightHandList = new List<Vector3>();
+        for (int i = 0; i < MAX_HAND_SMOOTHING; i++) {
+            _leftHandList.Add(Vector3.zero);
+            _rightHandList.Add(Vector3.zero);
         }
     }
 
@@ -576,24 +787,39 @@ public class MainCaera : MonoBehaviour {
         }
     }
 
-    void setStandardHandPose() {
+    void calcStandardHandPose(out Vector3 leftPos, out Quaternion leftRot, out Vector3 rightPos, out Quaternion rightRot, out Quaternion headRot) {
         // 頭に合わせて腕の位置を調整
         var headRotationEuler = halfAngleVector3(_head.transform.eulerAngles);
         headRotationEuler.x = headRotationEuler.x / 3;
         headRotationEuler.y = headRotationEuler.y / 2;
         headRotationEuler.z = headRotationEuler.z / 3;
-        var headRotation = Quaternion.Euler(headRotationEuler);
+        headRot = Quaternion.Euler(headRotationEuler);
         // 左手
-        var leftOffset = new Vector3(0.4f, -0.8f, -0.1f);
-        leftOffset = headRotation * leftOffset;
-        _leftHand.transform.position = _head.transform.position + leftOffset;
-        _leftHand.transform.rotation = headRotation * Quaternion.Euler(-25, 45, -67);
+        var leftOffset = new Vector3(0.3f, -0.85f, 0.0f);
+        leftOffset = headRot * leftOffset;
+        leftPos = _head.transform.position + leftOffset;
+        leftRot = headRot * Quaternion.Euler(-25, 120, -107);
 
         // 右手
-        var rightOffset = new Vector3(-0.4f, -0.8f, -0.1f);
-        rightOffset = headRotation * rightOffset;
-        _rightHand.transform.position = _head.transform.position + rightOffset;
-        _rightHand.transform.rotation = headRotation * Quaternion.Euler(-25, -45, 67);
+        var rightOffset = new Vector3(-0.3f, -0.85f, 0.0f);
+        rightOffset = headRot * rightOffset;
+        rightPos = _head.transform.position + rightOffset;
+        rightRot = headRot * Quaternion.Euler(-25, -120, 107);
+    }
+
+    void setStandardHandPose() {
+        Vector3 leftPos;
+        Quaternion leftRot;
+        Vector3 rightPos;
+        Quaternion rightRot;
+        Quaternion headRot;
+        calcStandardHandPose(out leftPos, out leftRot, out rightPos, out rightRot, out headRot);
+
+        _leftHand.transform.position = leftPos;
+        _leftHand.transform.rotation = leftRot;
+
+        _rightHand.transform.position = rightPos;
+        _rightHand.transform.rotation = rightRot;
     }
 
     void trackingEyes(Vector3 eye, List<Vector3> eyeList, 
@@ -631,9 +857,10 @@ public class MainCaera : MonoBehaviour {
             movingRatio = Mathf.Clamp(movingRatio, -1, 1);
             // 向きベクトルの長さを移動割合に補正
             dir = dir.normalized * movingRatio;
+            dir.x *= _mirror;
             go.transform.localPosition = new Vector3(dir.x, 0, -dir.y) * 10;
 
-            lookAt.x = -dir.x;
+            lookAt.x = dir.x; // メモ：頭の位置から相対座標で視線が決まるはずだが玉とVMCでXの向きが逆になる。ここでは玉の向きを優先してVMCに送信するときに*-1する
             lookAt.y = -dir.y;
             lookAt.z = -1;
         }
@@ -653,7 +880,7 @@ public class MainCaera : MonoBehaviour {
             eyeLtoR.z = 0;
             //float eyeDistance = eyeLtoR.magnitude;
             var faceLength = face.z * 2; // 顏の直径
-            var standardLength = 0.20f; // 20cm
+            var standardLength = 0.15f; // 15cm
             var pixParM = standardLength / faceLength;
 
             var facePosition = face - _calibratedFacePosition;
@@ -700,7 +927,7 @@ public class MainCaera : MonoBehaviour {
             if (faceRotationEuler.z > 75) faceRotationEuler.z = 75;
             
             // オフセット適用
-            facePosition.y += 1.3f;
+            facePosition.y += 1.6f;
 
             smooth(ref faceRotationEuler, _faceRotationList, _smoothingLevel);
             smooth(ref facePosition, _facePositionList, _smoothingLevel);
@@ -761,10 +988,196 @@ public class MainCaera : MonoBehaviour {
                 }
                 lookAt.x += _irisOffset.x;
                 lookAt.y += _irisOffset.y;
-                lookAt.x *= _irisTranslationMagnifications.x * _mirror;
+                lookAt.x *= _irisTranslationMagnifications.x;
                 lookAt.y *= _irisTranslationMagnifications.y;
                 lookAt.y += 0.33f;
                 _lookAt.transform.localPosition = lookAt;
+            }
+        }
+    }
+
+    Quaternion calcRotationAffectedByControlPoints(Vector3 p, Quaternion currentRotation, GameObject cp, Axis axis) {
+        float from = 0;
+        float to = 0;
+        switch (axis) {
+            case Axis.X:
+                from = p.x;
+                to = cp.transform.position.x;
+                break;
+            case Axis.Y:
+                from = p.y;
+                to = cp.transform.position.y;
+                break;
+            case Axis.Z:
+                from = p.z;
+                to = cp.transform.position.z;
+                break;
+        }
+
+        var targetRotation = cp.transform.rotation;
+
+        // 制御点との距離で影響度を計算
+        var len = Mathf.Abs(to - from);
+        var influence = len / cp.transform.localScale.z; // スケール値を分母(球の半径)にする
+        if (influence > 1.0f) { influence = 1.0f; }
+        return Quaternion.Lerp(targetRotation, currentRotation, influence);
+    }
+
+    void calcHandPosture(Vector3 handCircle, GameObject go, GameObject handPropes,  ref Vector3 positionAve, ref List<Vector3> handList, float handOffsetX) {
+        // 手の半径は顏の半分 の更に半分。動体検知では平均を取るため。
+        var calibratedHandPosition = new Vector3(_calibratedFacePosition.x, _calibratedFacePosition.y, _calibratedFacePosition.z * 0.25f);
+
+        if (calibratedHandPosition.z == 0) { return; }
+        if (handCircle.z == 0) { return; }
+        
+        var handLength = handCircle.z * 2; // 手の直径
+        var standardLength = 0.06f; // 6cm
+        var pixParM = standardLength / handLength;
+        var handPosition = handCircle - calibratedHandPosition;
+        handPosition.y *= -1;
+        handPosition *= pixParM;
+
+        if (calibratedHandPosition.z < handCircle.z) {
+            var radiusRatio = handCircle.z / (calibratedHandPosition.z + 1);
+            var distance = (radiusRatio - 1) * 0.6f; // ゼロ基準してから 0～60cm
+            handPosition.z = -distance;
+        }
+        else {
+            handPosition.z = 0;
+        }
+
+        // 大きく動かしてみるテスト
+        handPosition.x *= _handTranslationMagnifications.x * _mirror;
+        handPosition.y *= _handTranslationMagnifications.y;
+        handPosition.z *= _handTranslationMagnifications.z;
+
+        // オフセット適用
+        handPosition.x += handOffsetX;
+        handPosition.y += _handOffset.y + 1.6f;
+        handPosition.z += _handOffset.z + _head.transform.position.z; 
+
+        // スムージング
+        //float smoothingRatio = 1.0f / _handSmoothingLevel;
+        //float radiusSmoothigRatio = 1.0f / (_handSmoothingLevel * 2);
+        float smoothingRatio = 1.0f / _smoothingLevel;
+        float radiusSmoothigRatio = 1.0f / (_smoothingLevel * 2);
+        positionAve.x = (positionAve.x * (1.0f - smoothingRatio)) + (handPosition.x * smoothingRatio);
+        positionAve.y = (positionAve.y * (1.0f - smoothingRatio)) + (handPosition.y * smoothingRatio);
+        positionAve.z = (positionAve.z * (1.0f - radiusSmoothigRatio)) + (handPosition.z * radiusSmoothigRatio);
+        go.transform.position = positionAve;
+
+        // スムージング2
+        //smooth(ref handPosition, handList, _handSmoothingLevel);
+        //go.transform.position = handPosition;
+
+        // 手の向きを計算
+        handPropes.transform.position = _head.transform.position;
+        var C = handPropes.transform.Find("C").gameObject;
+        var F = handPropes.transform.Find("F").gameObject;
+        var O = handPropes.transform.Find("O").gameObject;
+        var T = handPropes.transform.Find("T").gameObject;
+        var B = handPropes.transform.Find("B").gameObject;
+
+        var p = go.transform.position;
+        var rot = C.transform.rotation;
+        rot = calcRotationAffectedByControlPoints(p, rot, F, Axis.Z);
+        rot = calcRotationAffectedByControlPoints(p, rot, O, Axis.X);
+        rot = calcRotationAffectedByControlPoints(p, rot, T, Axis.Y);
+        rot = calcRotationAffectedByControlPoints(p, rot, B, Axis.Y);
+
+        go.transform.rotation = rot;
+        
+    }
+
+    void trackingHandPoints() {
+        Vector3 leftCircle;
+        Vector3 rightCircle;
+        SMT.getHandPoints(out leftCircle, out rightCircle);
+        bool isLeftHandDetected = SMT.isLeftHandDetected();
+        bool isRightHandDetected = SMT.isRightHandDetected();
+        bool isLeftHandDown = SMT.isLeftHandDown();
+        bool isRightHandDown = SMT.isRightHandDown();
+
+        // 動体を見失った時に元の姿勢に戻す為の値
+        Vector3 leftStandardPos;
+        Quaternion leftStandardRot;
+        Vector3 rightStandardPos;
+        Quaternion rightStandardRot;
+        Quaternion headRot;
+        calcStandardHandPose(out leftStandardPos, out leftStandardRot, out rightStandardPos, out rightStandardRot, out headRot);
+        float ratioAcceleration = 0.005f;
+
+        if (_mirror == -1) {
+            for (int i = 0; i < 3; i++) {
+                float temp = leftCircle[i];
+                leftCircle[i] = rightCircle[i];
+                rightCircle[i] = temp;
+            }
+            var detected = isLeftHandDetected;
+            isLeftHandDetected = isRightHandDetected;
+            isRightHandDetected = detected;
+
+            var down = isLeftHandDown;
+            isLeftHandDown = isRightHandDown;
+            isRightHandDown = down;
+        }
+
+        if (isLeftHandDetected || _leftHandSmoothingDelay < _smoothingLevel) {
+            // 非検知の場合でもスムージングのフレーム数だけ更新を続ける
+            if (isRightHandDetected) { _leftHandSmoothingDelay = 0; }
+            else { _leftHandSmoothingDelay += 1; }
+
+            calcHandPosture(leftCircle, _leftHand, _leftHandPropes, ref _leftHandPositionAve, ref _leftHandList, _handOffset.x);
+            _leftHandStandardPoseMergeRatio = 0;
+            _leftHandStandardPoseMergeDelayStartTime = Time.time;
+            _leftHandPositionBackup = _leftHand.transform.position - _head.transform.position;
+        }
+        else {
+            if (isLeftHandDown) {
+                _leftHandStandardPoseMergeDelayStartTime -= _handStandardPoseMergeDelay;
+                if (_leftHandStandardPoseMergeDelayStartTime < 0) { _leftHandStandardPoseMergeDelayStartTime = 0; }
+                if (_leftHandStandardPoseMergeRatio < 0.1f) { _leftHandStandardPoseMergeRatio = 0.1f; }
+            }
+            if (Time.time - _leftHandStandardPoseMergeDelayStartTime > _handStandardPoseMergeDelay) {
+                var pos = _leftHand.transform.position;
+                var rot = _leftHand.transform.rotation;
+                _leftHand.transform.position = (pos * (1.0f - _leftHandStandardPoseMergeRatio)) + leftStandardPos * _leftHandStandardPoseMergeRatio;
+                _leftHand.transform.rotation = Quaternion.Lerp(rot, leftStandardRot, _leftHandStandardPoseMergeRatio);
+                _leftHandStandardPoseMergeRatio += ratioAcceleration;
+                if (_leftHandStandardPoseMergeRatio > 1) { _leftHandStandardPoseMergeRatio = 1; }
+            }
+            else {
+                _leftHand.transform.position = (headRot * _leftHandPositionBackup) + _head.transform.position;
+            }
+        }
+
+
+        if (isRightHandDetected || _rightHandSmoothingDelay < _smoothingLevel) {
+            // 非検知の場合でもスムージングのフレーム数だけ更新を続ける
+            if (isRightHandDetected) { _rightHandSmoothingDelay = 0; }
+            else { _rightHandSmoothingDelay += 1; }
+
+            calcHandPosture(rightCircle, _rightHand, _rightHandPropes, ref _rightHandPositionAve, ref _rightHandList, -_handOffset.x);
+            _rightHandStandardPoseMergeRatio = 0;
+            _rightHandStandardPoseMergeDelayStartTime = Time.time;
+            _rightHandPositionBackup = _rightHand.transform.position - _head.transform.position;
+        }
+        else {
+            if (isRightHandDown) {
+                _rightHandStandardPoseMergeDelayStartTime -= _handStandardPoseMergeDelay;
+                if (_rightHandStandardPoseMergeDelayStartTime < 0) { _rightHandStandardPoseMergeDelayStartTime = 0; }
+                if (_rightHandStandardPoseMergeRatio < 0.1f) { _rightHandStandardPoseMergeRatio = 0.1f; }
+            }
+            if (Time.time - _rightHandStandardPoseMergeDelayStartTime > _handStandardPoseMergeDelay) {
+                var pos = _rightHand.transform.position;
+                var rot = _rightHand.transform.rotation;
+                _rightHand.transform.position = (pos * (1.0f - _rightHandStandardPoseMergeRatio)) + rightStandardPos * _rightHandStandardPoseMergeRatio;
+                _rightHand.transform.rotation = Quaternion.Lerp(rot, rightStandardRot, _rightHandStandardPoseMergeRatio);
+                _rightHandStandardPoseMergeRatio += ratioAcceleration;
+                if (_rightHandStandardPoseMergeRatio > 1) { _rightHandStandardPoseMergeRatio = 1; }
+            }
+            else {
+                _rightHand.transform.position = (headRot * _rightHandPositionBackup) + _head.transform.position;
             }
         }
     }
@@ -774,7 +1187,7 @@ public class MainCaera : MonoBehaviour {
         // バモキャキャリブレーション用に現在の頭の位置を基準にTポーズで固定
         if (_isForcedTPose) {
             // 左手
-            var leftOffset = new Vector3(0.8f, -0.2f, 0);
+            var leftOffset = new Vector3(0.8f, -0.2f, 0.0f);
             leftOffset = _head.transform.rotation * leftOffset;
             _leftHand.transform.position = _head.transform.position + leftOffset;
             _leftHand.transform.rotation = _head.transform.rotation;
@@ -783,7 +1196,7 @@ public class MainCaera : MonoBehaviour {
             _calibratedLeftHandRotation = _leftHand.transform.rotation;
 
             // 右手
-            var rightOffset = new Vector3(-0.8f, -0.2f, 0);
+            var rightOffset = new Vector3(-0.8f, -0.2f, 0.0f);
             rightOffset = _head.transform.rotation * rightOffset;
             _rightHand.transform.position = _head.transform.position + rightOffset;
             _rightHand.transform.rotation = _head.transform.rotation;
@@ -800,7 +1213,11 @@ public class MainCaera : MonoBehaviour {
         if (_useFaceTracking || _useEyeTracking) {
             trackingFacePoints();
         }
-
-        setStandardHandPose();
+        if (_useHandTracking) {
+            trackingHandPoints();
+        }
+        else {
+            setStandardHandPose();
+        }
     }
 }

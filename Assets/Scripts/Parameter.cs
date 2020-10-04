@@ -17,10 +17,18 @@ public class Parameter {
     public Vector2 irisTranslationMagnifications;
     public float maxEyeOpenThreshold;
     public float minEyeOpenThreshold;
+    public bool useHandTracking;
+    public float handMovingThresholdMin;
+    public float handMovingThresholdMax;
+    public float handUndetectedDuration;
+    public Vector3 handOffset;
+    public Vector3 handTranslationMagnifications;
     public int smoothingLevel;
     public float autoAdjustmentRatio;
     public float autoAdjustmentDelay;
     public string deviceName;
     public float mirror;
     public int port;
+    public Vector3 vrPlayAreaOffsetTranslation;
+    public Vector3 vrPlayAreaOffsetRotation;
 }
