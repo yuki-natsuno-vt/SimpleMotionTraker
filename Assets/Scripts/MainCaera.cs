@@ -657,7 +657,7 @@ public class MainCaera : MonoBehaviour {
         _smoothingLevelInputField.text = "10";
 
         _autoAdjustmentInputField.text = "0.05";
-        _autoAdjustmentDelayInputField.text = "2.0";
+        _autoAdjustmentDelayInputField.text = "0.5";
         _autoAdjustmentDelayStartTime = Time.time;
         _mirrorToggle.isOn = false;
 
@@ -667,7 +667,7 @@ public class MainCaera : MonoBehaviour {
         _vrPlayAreaOffsetTranslationYInputField.text = "0";
         _vrPlayAreaOffsetTranslationZInputField.text = "0";
         _vrPlayAreaOffsetRotationXInputField.text = "0";
-        _vrPlayAreaOffsetRotationYInputField.text = "180";
+        _vrPlayAreaOffsetRotationYInputField.text = "0";
         _vrPlayAreaOffsetRotationZInputField.text = "0";
 
         refreshUI();
@@ -795,13 +795,13 @@ public class MainCaera : MonoBehaviour {
         headRotationEuler.z = headRotationEuler.z / 3;
         headRot = Quaternion.Euler(headRotationEuler);
         // 左手
-        var leftOffset = new Vector3(0.3f, -0.85f, 0.0f);
+        var leftOffset = new Vector3(0.4f, -0.85f, -0.2f);
         leftOffset = headRot * leftOffset;
         leftPos = _head.transform.position + leftOffset;
         leftRot = headRot * Quaternion.Euler(-25, 120, -107);
 
         // 右手
-        var rightOffset = new Vector3(-0.3f, -0.85f, 0.0f);
+        var rightOffset = new Vector3(-0.4f, -0.85f, -0.2f);
         rightOffset = headRot * rightOffset;
         rightPos = _head.transform.position + rightOffset;
         rightRot = headRot * Quaternion.Euler(-25, -120, 107);
