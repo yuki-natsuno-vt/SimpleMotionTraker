@@ -83,8 +83,8 @@ public class HeadTrackerSender : MonoBehaviour {
             }
             if (name != null && _object != null && _deviceSerial != null) {
                 var offsetRot = Quaternion.Euler(_vrPlayAreaOffsetRotation);
-                var pos = _object.transform.position + _vrPlayAreaOffsetTranslation;
-                var rot = _object.transform.rotation * offsetRot;
+                var pos = offsetRot * _object.transform.position + _vrPlayAreaOffsetTranslation;
+                var rot = offsetRot * _object.transform.rotation;
 
                 client.Send(name,
                     (string)_deviceSerial,
