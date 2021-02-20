@@ -901,26 +901,6 @@ public class MainCaera : MonoBehaviour {
             }
 
             var faceRotationEuler = faceAngle - _calibratedFaceAngle;
-            // 正面顔は角度の誤差が出やすいので強制的にスムーズレベルを上げる
-            if (-15 < faceRotationEuler.y && faceRotationEuler.y < 15) {
-                faceRotationEuler.y = 0;
-            }
-            //var faceRotationEuler = Vector3.zero;
-            //faceRotationEuler.z = -Mathf.Atan(eyeLtoR.y / eyeLtoR.x) * Mathf.Rad2Deg;
-
-            //var radY = facePosition.x / _faceAngleBaseDistance;
-            //if (Mathf.Abs(radY) > 1.0f) {
-            //    radY = radY / Mathf.Abs(radY); // -1 or 1に補正
-            //}
-            //faceRotationEuler.y = -Mathf.Asin(radY) * Mathf.Rad2Deg;
-
-
-            //var radX = facePosition.y / _faceAngleBaseDistance;
-            //if (Mathf.Abs(radX) > 1.0f) {
-            //    radX = radX / Mathf.Abs(radX); // -1 or 1に補正
-            //}
-            //faceRotationEuler.x = Mathf.Asin(radX) * Mathf.Rad2Deg;
-            //faceRotationEuler.x = faceRotationEuler.x * 2; // 縦方向の検出は弱いので大きく動くように補正.
 
             // 倍率適用
             facePosition = facePosition * _translationMagnification;
