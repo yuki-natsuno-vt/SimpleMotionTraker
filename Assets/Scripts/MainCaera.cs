@@ -88,6 +88,7 @@ public class MainCaera : MonoBehaviour {
     Quaternion _calibratedRightHandRotation;
     
     Vector3 _calibratedFacePosition;
+    Vector3 _calibratedFaceAngle;
     Vector3 _calibratedLeftEyePosition;
     Vector3 _calibratedRigthEyePosition;
 
@@ -207,15 +208,18 @@ public class MainCaera : MonoBehaviour {
 
     public void OnClickCalibrateFacePoints() {
         Vector3 face;
+        Vector3 faceAngle;
         Vector3 leftEye;
         Vector3 rightEye;
         Vector3 leftIris;
         Vector3 rightIris;
-        SMT.getFacePoints(out face, out leftEye, out rightEye, out leftIris, out rightIris);
+        SMT.getFacePoints(out face, out faceAngle, out leftEye, out rightEye, out leftIris, out rightIris);
 
         _calibratedFacePosition = face;
         _calibratedLeftEyePosition = leftEye;
         _calibratedRigthEyePosition = rightEye;
+        // 顏の角度は誤差が大きいので平均を基準とする
+        smooth(ref _calibratedFaceAngle, _faceRotationList, MAX_SMOOTHING_LEVEL);
     }
 
     public void OnChangeUseEyeTracking() {
@@ -615,6 +619,7 @@ public class MainCaera : MonoBehaviour {
         SMT.setUseHandTracking(_useHandTracking);
 
         _calibratedFacePosition = Vector3.zero;
+        _calibratedFaceAngle = Vector3.zero;
         _calibratedLeftEyePosition = Vector3.zero;
         _calibratedRigthEyePosition = Vector3.zero;
 
@@ -654,7 +659,7 @@ public class MainCaera : MonoBehaviour {
         _leftHandStandardPoseMergeDelayStartTime = Time.time;
         _rightHandStandardPoseMergeDelayStartTime = Time.time;
 
-        _smoothingLevelInputField.text = "10";
+        _smoothingLevelInputField.text = "5";
 
         _autoAdjustmentInputField.text = "0.05";
         _autoAdjustmentDelayInputField.text = "0.5";
@@ -869,11 +874,12 @@ public class MainCaera : MonoBehaviour {
     void trackingFacePoints() {
         if (SMT.isFacePointsDetected()) {
             Vector3 face;
+            Vector3 faceAngle;
             Vector3 leftEye;
             Vector3 rightEye;
             Vector3 leftIris;
             Vector3 rightIris;
-            SMT.getFacePoints(out face, out leftEye, out rightEye, out leftIris, out rightIris);
+            SMT.getFacePoints(out face, out faceAngle, out leftEye, out rightEye, out leftIris, out rightIris);
 
             // 目の間の距離
             var eyeLtoR = rightEye - leftEye;
@@ -887,7 +893,6 @@ public class MainCaera : MonoBehaviour {
             facePosition.y *= -1;
             facePosition *= pixParM;
 
-            var faceRotationEuler =Vector3.zero;
             if (_calibratedFacePosition.z < face.z) {
                 facePosition.z = -1 + (_calibratedFacePosition.z / face.z);
             }
@@ -895,21 +900,27 @@ public class MainCaera : MonoBehaviour {
                 facePosition.z = 0;
             }
 
-            faceRotationEuler.z = -Mathf.Atan(eyeLtoR.y / eyeLtoR.x) * Mathf.Rad2Deg;
-
-            var radY = facePosition.x / _faceAngleBaseDistance;
-            if (Mathf.Abs(radY) > 1.0f) {
-                radY = radY / Mathf.Abs(radY); // -1 or 1に補正
+            var faceRotationEuler = faceAngle - _calibratedFaceAngle;
+            // 正面顔は角度の誤差が出やすいので強制的にスムーズレベルを上げる
+            if (-15 < faceRotationEuler.y && faceRotationEuler.y < 15) {
+                faceRotationEuler.y = 0;
             }
-            faceRotationEuler.y = -Mathf.Asin(radY) * Mathf.Rad2Deg;
+            //var faceRotationEuler = Vector3.zero;
+            //faceRotationEuler.z = -Mathf.Atan(eyeLtoR.y / eyeLtoR.x) * Mathf.Rad2Deg;
+
+            //var radY = facePosition.x / _faceAngleBaseDistance;
+            //if (Mathf.Abs(radY) > 1.0f) {
+            //    radY = radY / Mathf.Abs(radY); // -1 or 1に補正
+            //}
+            //faceRotationEuler.y = -Mathf.Asin(radY) * Mathf.Rad2Deg;
 
 
-            var radX = facePosition.y / _faceAngleBaseDistance;
-            if (Mathf.Abs(radX) > 1.0f) {
-                radX = radX / Mathf.Abs(radX); // -1 or 1に補正
-            }
-            faceRotationEuler.x = Mathf.Asin(radX) * Mathf.Rad2Deg;
-            faceRotationEuler.x = faceRotationEuler.x * 2; // 縦方向の検出は弱いので大きく動くように補正.
+            //var radX = facePosition.y / _faceAngleBaseDistance;
+            //if (Mathf.Abs(radX) > 1.0f) {
+            //    radX = radX / Mathf.Abs(radX); // -1 or 1に補正
+            //}
+            //faceRotationEuler.x = Mathf.Asin(radX) * Mathf.Rad2Deg;
+            //faceRotationEuler.x = faceRotationEuler.x * 2; // 縦方向の検出は弱いので大きく動くように補正.
 
             // 倍率適用
             facePosition = facePosition * _translationMagnification;
@@ -929,6 +940,7 @@ public class MainCaera : MonoBehaviour {
             // オフセット適用
             facePosition.y += 1.6f;
 
+            // スムージング
             smooth(ref faceRotationEuler, _faceRotationList, _smoothingLevel);
             smooth(ref facePosition, _facePositionList, _smoothingLevel);
 

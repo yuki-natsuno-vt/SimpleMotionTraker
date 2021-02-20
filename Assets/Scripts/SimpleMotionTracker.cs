@@ -18,7 +18,7 @@ public class SMT
     public const int SMT_ERROR_INSUFFICIENT_CAMERA_CAPTURE_SPEED = -6;
 
     [DllImport("SimpleMotionTracker", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    private static extern void SMT_init(string videoDeviceName);
+    private static extern void SMT_init(string videoDeviceName, string dataPath);
     [DllImport("SimpleMotionTracker")]
     private static extern void SMT_destroy();
     [DllImport("SimpleMotionTracker")]
@@ -69,7 +69,9 @@ public class SMT
     public static bool isDebug = false;
 
     public static void init(string videoDeviceName) {
-        SMT_init(videoDeviceName);
+        //string dataPath = "Assets/StreamingAssets/";
+        string dataPath = "SimpleMotionTracker_Data/StreamingAssets/";
+        SMT_init(videoDeviceName, dataPath);
     }
 
     public static void destroy() {
@@ -137,17 +139,18 @@ public class SMT
     }
 
     /// <summary>
-    /// 画面上の顏の中心、左目、右目、左虹彩、右虹彩 位置を取得
+    /// 画面上の顏の中心、顏の角度、左目、右目、左虹彩、右虹彩 位置を取得
     /// 顏、目のz要素は半径、虹彩のz要素は縦横比
     /// </summary>
-    public static void getFacePoints(out Vector3 face, out Vector3 leftEye, out Vector3 rightEye, out Vector3 leftIris, out Vector3 rightIris) {
-        int length = 15;
+    public static void getFacePoints(out Vector3 face, out Vector3 faceAngle, out Vector3 leftEye, out Vector3 rightEye, out Vector3 leftIris, out Vector3 rightIris) {
+        int length = 18;
         float[] points = {
             0, 0, 0, // 頭
             0, 0, 0, // 左目
             0, 0, 0, // 右目
             0, 0, 0, // 左虹彩
             0, 0, 0, // 右虹彩
+            0, 0, 0, // 頭角度
         };
 
         System.IntPtr ptr = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(float)) * length);
@@ -159,6 +162,7 @@ public class SMT
         rightEye = new Vector3(points[6], points[7], points[8]);
         leftIris = new Vector3(points[9], points[10], points[11]);
         rightIris = new Vector3(points[12], points[13], points[14]);
+        faceAngle = new Vector3(points[15], points[16], points[17]);
     }
 
     public static void setIrisThresh(int thresh) {
