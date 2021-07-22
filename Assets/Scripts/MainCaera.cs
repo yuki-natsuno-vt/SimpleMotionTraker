@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.UI;
+using VRM;
 
 public class MainCaera : MonoBehaviour {
 
@@ -144,6 +145,8 @@ public class MainCaera : MonoBehaviour {
     int _port = 0;
 
     bool _isCaptureShown = false;
+
+    GameObject _vrmModel = null;
 
 
     Vector3 _vrPlayAreaOffsetTranslation = Vector3.zero;
@@ -600,8 +603,38 @@ public class MainCaera : MonoBehaviour {
         v = v / length;
     }
 
+    void loadVRMModel(string path) {
+        if (File.Exists(path))
+        {
+            if (_vrmModel != null)
+            {
+                Destroy(_vrmModel);
+                _vrmModel = null;
+            }
+
+            byte[] VRMdata = File.ReadAllBytes(path);
+            //読み込み
+            VRMImporterContext vrmImporter = new VRMImporterContext();
+            vrmImporter.ParseGlb(VRMdata);
+            vrmImporter.LoadAsync(() =>
+            {
+                Debug.Log("VRM load complete.");
+                _vrmModel = vrmImporter.Root;
+                vrmImporter.EnableUpdateWhenOffscreen();
+                //vrmImporter.ShowMeshes();
+            });
+        }
+        else
+        {
+            Debug.LogError("VRM load failed.");
+        }
+    }
+
     // Use this for initialization
     void Start() {
+        string vrmPath = "G:/project/Unity/VRM_Test/YukiNatsuno_VRM4_ScaleUp.vrm";
+        loadVRMModel(vrmPath);
+
         WebCamDevice[] webCamDevice;
         webCamDevice = WebCamTexture.devices;
         for (int i = 0; i < webCamDevice.Length; i++) {
