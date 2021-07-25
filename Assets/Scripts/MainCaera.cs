@@ -16,6 +16,7 @@ public class MainCaera : MonoBehaviour {
     [SerializeField] GameObject _lookAt;
     [SerializeField] GameObject _leftHandPropes;
     [SerializeField] GameObject _rightHandPropes;
+    [SerializeField] GameObject _fingerController;
 
     [SerializeField] Toggle _forceTPoseToggle;
     [SerializeField] Toggle _useFaceTrackingToggle;
@@ -68,6 +69,12 @@ public class MainCaera : MonoBehaviour {
     [SerializeField] InputField _vrPlayAreaOffsetRotationXInputField;
     [SerializeField] InputField _vrPlayAreaOffsetRotationYInputField;
     [SerializeField] InputField _vrPlayAreaOffsetRotationZInputField;
+
+    [SerializeField] Text _loadBoneVRMStatus;
+    [SerializeField] Toggle _useFingerControlWithInputDevices;
+    [SerializeField] Toggle _useGripPoses;
+    [SerializeField] Dropdown _joypadDeviceList;
+    [SerializeField] Text _selectedJoypadDeviceName;
 
     int _zAxisFlipFrameCount = 0; // フリップ発生フレーム数.
 
@@ -147,7 +154,6 @@ public class MainCaera : MonoBehaviour {
     bool _isCaptureShown = false;
 
     GameObject _vrmModel = null;
-
 
     Vector3 _vrPlayAreaOffsetTranslation = Vector3.zero;
     Vector3 _vrPlayAreaOffsetRotation = Vector3.zero;
@@ -412,6 +418,32 @@ public class MainCaera : MonoBehaviour {
         _vrPlayAreaOffsetRotation.z = float.Parse(_vrPlayAreaOffsetRotationZInputField.text);
         applyVRPlayAreaOffset();
     }
+    
+    public void OnClickLoadBoneVRM() {
+        var path = FilePathSelecter.getOpenFileName("-l \"Open Files\" \"VRM files(*.vrm)\\0 *.cfg\\0All files(*.*)\\0 *.*\\0\\0\" \"vrm\"");
+        //string path = "G:/project/Unity/VRM_Test/YukiNatsuno_VRM4_ScaleUp.vrm";
+        if (string.IsNullOrEmpty(path))
+        {
+            return;
+        }
+        if (File.Exists(path))
+        {
+            loadVRMModel(path);
+        }
+    }
+
+    public void OnUseFingerControlWithInputDevices() {
+        var fc = _fingerController.GetComponent<FingerController>();
+        fc._useFingerControl = _useFingerControlWithInputDevices.isOn;
+        fc.LoadConfig();
+    }
+
+    public void OnUseGripPoses() {
+        _fingerController.GetComponent<FingerController>()._useGripPoses = _useGripPoses.isOn;
+    }
+
+    public void OnChangeJoypadDeviceList() {
+        _fingerController.GetComponent<FingerController>().InitDevices(_selectedJoypadDeviceName.text);    }
 
     public void OnClickSave() {
         var fileName = SMT.getSaveFileName();
@@ -621,7 +653,13 @@ public class MainCaera : MonoBehaviour {
                 Debug.Log("VRM load complete.");
                 _vrmModel = vrmImporter.Root;
                 vrmImporter.EnableUpdateWhenOffscreen();
-                //vrmImporter.ShowMeshes();
+                vrmImporter.ShowMeshes();
+                _vrmModel.transform.position = new Vector3(0, 0, 1);
+                //_vrmModel.transform.rotation = Quaternion.Euler(0, 180, 0);
+
+                _fingerController.GetComponent<FingerController>().SetModel(_vrmModel);
+
+                _loadBoneVRMStatus.text = "Stetus: VRM is loaded.";
             });
         }
         else
@@ -631,10 +669,8 @@ public class MainCaera : MonoBehaviour {
     }
 
     // Use this for initialization
-    void Start() {
-        string vrmPath = "G:/project/Unity/VRM_Test/YukiNatsuno_VRM4_ScaleUp.vrm";
-        loadVRMModel(vrmPath);
-
+    void Start()
+    {
         WebCamDevice[] webCamDevice;
         webCamDevice = WebCamTexture.devices;
         for (int i = 0; i < webCamDevice.Length; i++) {
@@ -707,6 +743,15 @@ public class MainCaera : MonoBehaviour {
         _vrPlayAreaOffsetRotationXInputField.text = "0";
         _vrPlayAreaOffsetRotationYInputField.text = "0";
         _vrPlayAreaOffsetRotationZInputField.text = "0";
+
+        _useFingerControlWithInputDevices.isOn = false;
+        _useGripPoses.isOn = false;
+        
+        var joypadDeviceNameList = ynv.Input.GetDeviceNames();
+        foreach (var name in joypadDeviceNameList)
+        {
+            _joypadDeviceList.options.Add(new Dropdown.OptionData(name));
+        }
 
         refreshUI();
 
