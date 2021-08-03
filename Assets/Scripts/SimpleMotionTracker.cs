@@ -66,13 +66,13 @@ public class SMT
     [DllImport("SimpleMotionTracker")]
     private static extern int SMT_getErrorCode();
 
-    public static bool isDebug = true;
+    public static bool isDebug = false;
 
     public static void init(string videoDeviceName) {
-        string dataPath = "SimpleMotionTracker_Data/StreamingAssets/";
-        if (isDebug)
+        string dataPath = "./SimpleMotionTracker_Data/StreamingAssets/";
+        if (!Directory.Exists(dataPath))
         {
-            dataPath = "Assets/StreamingAssets/";
+            dataPath = "./Assets/StreamingAssets/";
         }
         SMT_init(videoDeviceName, dataPath);
     }

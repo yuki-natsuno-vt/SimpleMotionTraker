@@ -372,6 +372,7 @@ public class MainCaera : MonoBehaviour {
         _head.GetComponent<HeadTrackerSender>().ChangePort(_port);
         _leftHand.GetComponent<TrackerSender>().ChangePort(_port);
         _rightHand.GetComponent<TrackerSender>().ChangePort(_port);
+        _fingerController.GetComponent<FingerController>().ChangePort(_port);
     }
     
     public void OnChangeCaptureShown() {
@@ -420,8 +421,7 @@ public class MainCaera : MonoBehaviour {
     }
     
     public void OnClickLoadBoneVRM() {
-        var path = FilePathSelecter.getOpenFileName("-l \"Open Files\" \"VRM files(*.vrm)\\0 *.cfg\\0All files(*.*)\\0 *.*\\0\\0\" \"vrm\"");
-        //string path = "G:/project/Unity/VRM_Test/YukiNatsuno_VRM4_ScaleUp.vrm";
+        var path = FilePathSelecter.getOpenFileName("-l \"Open Files\" \"VRM files(*.vrm)\\0 *.vrm\\0All files(*.*)\\0 *.*\\0\\0\" \"vrm\"");
         if (string.IsNullOrEmpty(path))
         {
             return;
@@ -436,6 +436,7 @@ public class MainCaera : MonoBehaviour {
         var fc = _fingerController.GetComponent<FingerController>();
         fc._useFingerControl = _useFingerControlWithInputDevices.isOn;
         fc.LoadConfig();
+        _fingerController.GetComponent<FingerController>().InitDevices(_selectedJoypadDeviceName.text);
     }
 
     public void OnUseGripPoses() {
@@ -443,7 +444,7 @@ public class MainCaera : MonoBehaviour {
     }
 
     public void OnChangeJoypadDeviceList() {
-        _fingerController.GetComponent<FingerController>().InitDevices(_selectedJoypadDeviceName.text);    }
+    }
 
     public void OnClickSave() {
         var fileName = SMT.getSaveFileName();
@@ -653,8 +654,8 @@ public class MainCaera : MonoBehaviour {
                 Debug.Log("VRM load complete.");
                 _vrmModel = vrmImporter.Root;
                 vrmImporter.EnableUpdateWhenOffscreen();
-                vrmImporter.ShowMeshes();
-                _vrmModel.transform.position = new Vector3(0, 0, 1);
+                //vrmImporter.ShowMeshes();
+                //_vrmModel.transform.position = new Vector3(0, 0, 1);
                 //_vrmModel.transform.rotation = Quaternion.Euler(0, 180, 0);
 
                 _fingerController.GetComponent<FingerController>().SetModel(_vrmModel);

@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-//using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using SharpDX.DirectInput;
@@ -24,6 +23,31 @@ namespace ynv
 
         private Dictionary<MouseOffset, int> _prevMouseData;
         private Dictionary<MouseOffset, int> _currentMouseData;
+
+
+        public static List<string> GetDeviceNames()
+        {
+            var names = new List<string>();
+            foreach (var device in joypadDeviceInstances)
+            {
+                names.Add(device.ProductName);
+            }
+            return names;
+        }
+
+        public static int DeviceNameToIndex(string deviceName)
+        {
+            int index = 0;
+            foreach (var device in joypadDeviceInstances)
+            {
+                if (deviceName == device.ProductName)
+                {
+                    return index;
+                }
+                index++;
+            }
+            return -1;
+        }
 
         static Input()
         {
@@ -115,29 +139,6 @@ namespace ynv
                     _currentMouseData[data.Offset] = data.Value;
                 }
             }
-        }
-
-        public static List<string> GetDeviceNames() {
-            var names = new List<string>();
-            foreach (var device in joypadDeviceInstances)
-            {
-                names.Add(device.ProductName);
-            }
-            return names;
-        }
-
-        public static int DeviceNameToIndex(string deviceName)
-        {
-            int index = 0;
-            foreach (var device in joypadDeviceInstances)
-            {
-                if (deviceName == device.ProductName)
-                {
-                    return index;
-                }
-                index++;
-            }
-            return -1;
         }
 
         public void Update()

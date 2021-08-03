@@ -1,9 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
-using System.Collections;
 using System.Collections.Generic;
-//using System.Text.Json;
+using System.Reflection;
 using UnityEngine;
 using VRM;
 using ynv;
@@ -11,32 +9,6 @@ using ynv;
 [RequireComponent(typeof(uOSC.uOscClient))]
 public class FingerController : MonoBehaviour
 {
-    uOSC.uOscClient uClient = null;
-
-    public GameObject Model = null;
-    private GameObject OldModel = null;
-
-    Animator animator = null;
-    VRMBlendShapeProxy blendShapeProxy = null;
-
-    public enum VirtualDevice
-    {
-        HMD = 0,
-        Controller = 1,
-        Tracker = 2,
-    }
-
-    HumanBodyBones[] targetHumanBodyBones;
-
-    private ynv.Input _input;
-
-    private GameObject _model;
-
-    private float _motionSpeed = 1.0f;
-
-    public bool _useFingerControl = false;
-    public bool _useGripPoses = false;
-
     public enum Finger : int
     {
         LeftThumb, // 左親指
@@ -51,42 +23,6 @@ public class FingerController : MonoBehaviour
         RightLittle, // 右小指
         Max
     }
-
-    private const int MAX_FINGER_ANGLE = 90;
-
-    private Vector3[] _opendAxis = new Vector3[(int)Finger.Max]; // 各指を曲げる軸. 親指は例外
-    public float[] _rate = new float[(int)Finger.Max]; // 各指の曲げ割合
-
-    private ynv.JoypadCode[] _axisKeyCodes = new ynv.JoypadCode[]{
-        ynv.JoypadCode.XAxis,
-        ynv.JoypadCode.YAxis,
-        ynv.JoypadCode.ZAxis,
-        ynv.JoypadCode.XAxisRotation,
-        ynv.JoypadCode.YAxisRotation,
-        ynv.JoypadCode.ZAxisRotation,
-        ynv.JoypadCode.Slider0,
-        ynv.JoypadCode.Slider1,
-        ynv.JoypadCode.PointOfView0,
-        ynv.JoypadCode.PointOfView1,
-        ynv.JoypadCode.PointOfView2,
-        ynv.JoypadCode.PointOfView3,
-    };
-
-    private static readonly Dictionary<string, Finger> fingerCodeToEnumFinger = new Dictionary<string, Finger>()
-    {
-        {"L0", Finger.LeftThumb },
-        {"L1", Finger.LeftIndex },
-        {"L2", Finger.LeftMiddle },
-        {"L3", Finger.LeftRing },
-        {"L4", Finger.LeftLittle },
-        {"R0", Finger.RightThumb },
-        {"R1", Finger.RightIndex },
-        {"R2", Finger.RightMiddle },
-        {"R3", Finger.RightRing },
-        {"R4", Finger.RightLittle }
-    };
-
-    public bool _debugDisable = false;
 
     public class ControlParameter
     {
@@ -131,6 +67,111 @@ public class FingerController : MonoBehaviour
         }
     }
 
+    uOSC.uOscClient uClient = null;
+
+    public GameObject Model = null;
+    private GameObject OldModel = null;
+
+    Animator animator = null;
+    VRMBlendShapeProxy blendShapeProxy = null;
+
+    private ynv.Input _input;
+
+    private GameObject _model;
+
+    private float _motionSpeed = 1.0f;
+
+    public bool _useFingerControl = false;
+    public bool _useGripPoses = false;
+
+    private const int MAX_FINGER_ANGLE = 90;
+
+    private Vector3[] _opendAxis = new Vector3[(int)Finger.Max]; // 各指を曲げる軸. 親指は例外
+    private float[] _rate = new float[(int)Finger.Max]; // 各指の曲げ割合
+
+    private ynv.JoypadCode[] _axisKeyCodes = new ynv.JoypadCode[]{
+        ynv.JoypadCode.XAxis,
+        ynv.JoypadCode.YAxis,
+        ynv.JoypadCode.ZAxis,
+        ynv.JoypadCode.XAxisRotation,
+        ynv.JoypadCode.YAxisRotation,
+        ynv.JoypadCode.ZAxisRotation,
+        ynv.JoypadCode.Slider0,
+        ynv.JoypadCode.Slider1,
+        ynv.JoypadCode.PointOfView0,
+        ynv.JoypadCode.PointOfView1,
+        ynv.JoypadCode.PointOfView2,
+        ynv.JoypadCode.PointOfView3,
+    };
+
+    private static readonly Dictionary<string, Finger> fingerCodeToEnumFinger = new Dictionary<string, Finger>()
+    {
+        {"L0", Finger.LeftThumb },
+        {"L1", Finger.LeftIndex },
+        {"L2", Finger.LeftMiddle },
+        {"L3", Finger.LeftRing },
+        {"L4", Finger.LeftLittle },
+        {"R0", Finger.RightThumb },
+        {"R1", Finger.RightIndex },
+        {"R2", Finger.RightMiddle },
+        {"R3", Finger.RightRing },
+        {"R4", Finger.RightLittle }
+    };
+
+    private HumanBodyBones[] targetHumanBodyBones = new HumanBodyBones[] {
+            HumanBodyBones.LeftThumbProximal, // 左親指第一指骨のボーン
+            HumanBodyBones.LeftThumbIntermediate, // 左親指第二指骨のボーン
+            HumanBodyBones.LeftThumbDistal, // 左親指第三指骨のボーン
+            HumanBodyBones.LeftIndexProximal, // 左人差し指第一指骨のボーン
+            HumanBodyBones.LeftIndexIntermediate, // 左人差し指第二指骨のボーン
+            HumanBodyBones.LeftIndexDistal, // 左人差し指第三指骨のボーン
+            HumanBodyBones.LeftMiddleProximal, // 左中指第一指骨のボーン
+            HumanBodyBones.LeftMiddleIntermediate, // 左中指第二指骨のボーン
+            HumanBodyBones.LeftMiddleDistal, // 左中指第三指骨のボーン
+            HumanBodyBones.LeftRingProximal, // 左薬指第一指骨のボーン
+            HumanBodyBones.LeftRingIntermediate, // 左薬指第二指骨のボーン
+            HumanBodyBones.LeftRingDistal, // 左薬指第三指骨のボーン
+            HumanBodyBones.LeftLittleProximal, // 左小指第一指骨のボーン
+            HumanBodyBones.LeftLittleIntermediate, // 左小指第二指骨のボーン
+            HumanBodyBones.LeftLittleDistal, // 左小指第三指骨のボーン
+            HumanBodyBones.RightThumbProximal, // 右親指第一指骨のボーン
+            HumanBodyBones.RightThumbIntermediate, // 右親指第二指骨のボーン
+            HumanBodyBones.RightThumbDistal, // 右親指第三指骨のボーン
+            HumanBodyBones.RightIndexProximal, // 右人差し指第一指骨のボーン
+            HumanBodyBones.RightIndexIntermediate, // 右人差し指第二指骨のボーン
+            HumanBodyBones.RightIndexDistal, // 右人差し指第三指骨のボーン
+            HumanBodyBones.RightMiddleProximal, // 右中指第一指骨のボーン
+            HumanBodyBones.RightMiddleIntermediate, // 右中指第二指骨
+            HumanBodyBones.RightMiddleDistal, // 右中指第三指骨のボーン
+            HumanBodyBones.RightRingProximal, // 右薬指第一指骨のボーン
+            HumanBodyBones.RightRingIntermediate, // 右薬指第二指骨のボーン
+            HumanBodyBones.RightRingDistal, // 右薬指第三指骨のボーン
+            HumanBodyBones.RightLittleProximal, // 右小指第一指骨のボーン
+            HumanBodyBones.RightLittleIntermediate, // 右小指第二指骨のボーン
+            HumanBodyBones.RightLittleDistal // 右小指第三指骨のボーン
+};
+
+    List<ControlParameter> _defaultPosesControlParameter = new List<ControlParameter>();
+    List<ControlParameter> _gripPosesControlParameter = new List<ControlParameter>();
+    Dictionary<ynv.JoypadCode, List<ControlParameter>> _joypadCodeToControlParameter = new Dictionary<ynv.JoypadCode, List<ControlParameter>>();
+    Dictionary<ynv.KeyCode, List<ControlParameter>> _keyCodeToControlParameter = new Dictionary<ynv.KeyCode, List<ControlParameter>>();
+    Dictionary<ynv.MouseCode, List<ControlParameter>> _mouseCodeToControlParameter = new Dictionary<ynv.MouseCode, List<ControlParameter>>();
+
+    public bool _debugDisable = false;
+
+    public void ChangePort(int port)
+    {
+        if (uClient == null)
+        {
+            return;
+        }
+        uClient.enabled = false;
+        var type = typeof(uOSC.uOscClient);
+        var portfield = type.GetField("port", BindingFlags.SetField | BindingFlags.NonPublic | BindingFlags.Instance);
+        portfield.SetValue(uClient, port);
+        uClient.enabled = true;
+    }
+
     public void SetModel(GameObject model)
     {
         Model = model;
@@ -152,11 +193,6 @@ public class FingerController : MonoBehaviour
         calcFingersRotationAxis(Finger.RightLittle, HumanBodyBones.RightLittleProximal, HumanBodyBones.RightLittleDistal);
     }
 
-    List<ControlParameter> _defaultPosesControlParameter = new List<ControlParameter>();
-    List<ControlParameter> _gripPosesControlParameter = new List<ControlParameter>();
-    Dictionary<ynv.JoypadCode, List<ControlParameter>> _joypadCodeToControlParameter = new Dictionary<ynv.JoypadCode, List<ControlParameter>>();
-    Dictionary<ynv.KeyCode, List<ControlParameter>> _keyCodeToControlParameter = new Dictionary<ynv.KeyCode, List<ControlParameter>>();
-    Dictionary<ynv.MouseCode, List<ControlParameter>> _mouseCodeToControlParameter = new Dictionary<ynv.MouseCode, List<ControlParameter>>();
 
     public void LoadConfig()
     {
@@ -254,39 +290,6 @@ public class FingerController : MonoBehaviour
     void Start()
     {
         uClient = GetComponent<uOSC.uOscClient>();
-
-        targetHumanBodyBones = new HumanBodyBones[] {
-            HumanBodyBones.LeftThumbProximal, // 左親指第一指骨のボーン
-            HumanBodyBones.LeftThumbIntermediate, // 左親指第二指骨のボーン
-            HumanBodyBones.LeftThumbDistal, // 左親指第三指骨のボーン
-            HumanBodyBones.LeftIndexProximal, // 左人差し指第一指骨のボーン
-            HumanBodyBones.LeftIndexIntermediate, // 左人差し指第二指骨のボーン
-            HumanBodyBones.LeftIndexDistal, // 左人差し指第三指骨のボーン
-            HumanBodyBones.LeftMiddleProximal, // 左中指第一指骨のボーン
-            HumanBodyBones.LeftMiddleIntermediate, // 左中指第二指骨のボーン
-            HumanBodyBones.LeftMiddleDistal, // 左中指第三指骨のボーン
-            HumanBodyBones.LeftRingProximal, // 左薬指第一指骨のボーン
-            HumanBodyBones.LeftRingIntermediate, // 左薬指第二指骨のボーン
-            HumanBodyBones.LeftRingDistal, // 左薬指第三指骨のボーン
-            HumanBodyBones.LeftLittleProximal, // 左小指第一指骨のボーン
-            HumanBodyBones.LeftLittleIntermediate, // 左小指第二指骨のボーン
-            HumanBodyBones.LeftLittleDistal, // 左小指第三指骨のボーン
-            HumanBodyBones.RightThumbProximal, // 右親指第一指骨のボーン
-            HumanBodyBones.RightThumbIntermediate, // 右親指第二指骨のボーン
-            HumanBodyBones.RightThumbDistal, // 右親指第三指骨のボーン
-            HumanBodyBones.RightIndexProximal, // 右人差し指第一指骨のボーン
-            HumanBodyBones.RightIndexIntermediate, // 右人差し指第二指骨のボーン
-            HumanBodyBones.RightIndexDistal, // 右人差し指第三指骨のボーン
-            HumanBodyBones.RightMiddleProximal, // 右中指第一指骨のボーン
-            HumanBodyBones.RightMiddleIntermediate, // 右中指第二指骨
-            HumanBodyBones.RightMiddleDistal, // 右中指第三指骨のボーン
-            HumanBodyBones.RightRingProximal, // 右薬指第一指骨のボーン
-            HumanBodyBones.RightRingIntermediate, // 右薬指第二指骨のボーン
-            HumanBodyBones.RightRingDistal, // 右薬指第三指骨のボーン
-            HumanBodyBones.RightLittleProximal, // 右小指第一指骨のボーン
-            HumanBodyBones.RightLittleIntermediate, // 右小指第二指骨のボーン
-            HumanBodyBones.RightLittleDistal // 右小指第三指骨のボーン
-        };
     }
 
     void calcFingersRotationAxis(Finger finger, HumanBodyBones proximal, HumanBodyBones distal)

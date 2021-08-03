@@ -152,7 +152,7 @@
     {"code":"NumberPad0",      "rate":0.5, "finger":"R1"}
   ],
   "mouse":[
-    {"code":"Button0",  "rate":0.2, "finger":"L1"},
-    {"code":"Button1",  "rate":0.2, "finger":"L2"}
+    {"code":"Button0",  "rate":0.2, "finger":"R1"},
+    {"code":"Button1",  "rate":0.2, "finger":"R2"}
   ]
 }
