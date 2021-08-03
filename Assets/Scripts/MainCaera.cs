@@ -153,10 +153,13 @@ public class MainCaera : MonoBehaviour {
 
     bool _isCaptureShown = false;
 
+    string _boneVrmPath;
     GameObject _vrmModel = null;
 
     Vector3 _vrPlayAreaOffsetTranslation = Vector3.zero;
     Vector3 _vrPlayAreaOffsetRotation = Vector3.zero;
+
+    string _joypadDeviceName;
 
     // 軸の種類
     enum Axis {
@@ -429,6 +432,7 @@ public class MainCaera : MonoBehaviour {
         if (File.Exists(path))
         {
             loadVRMModel(path);
+            _boneVrmPath = path;
         }
     }
 
@@ -436,7 +440,7 @@ public class MainCaera : MonoBehaviour {
         var fc = _fingerController.GetComponent<FingerController>();
         fc._useFingerControl = _useFingerControlWithInputDevices.isOn;
         fc.LoadConfig();
-        _fingerController.GetComponent<FingerController>().InitDevices(_selectedJoypadDeviceName.text);
+        _fingerController.GetComponent<FingerController>().InitDevices(_joypadDeviceName);
     }
 
     public void OnUseGripPoses() {
@@ -444,6 +448,7 @@ public class MainCaera : MonoBehaviour {
     }
 
     public void OnChangeJoypadDeviceList() {
+        _joypadDeviceName = _selectedJoypadDeviceName.text;
     }
 
     public void OnClickSave() {
@@ -482,6 +487,8 @@ public class MainCaera : MonoBehaviour {
         p.port = _port;
         p.vrPlayAreaOffsetTranslation = _vrPlayAreaOffsetTranslation;
         p.vrPlayAreaOffsetRotation = _vrPlayAreaOffsetRotation;
+        p.boneVrmPath = _boneVrmPath;
+        p.joypadDeviceName = _joypadDeviceName;
 
         string json = JsonUtility.ToJson(p);
         File.WriteAllText(fileName, json);
@@ -538,6 +545,7 @@ public class MainCaera : MonoBehaviour {
         _vrPlayAreaOffsetRotationXInputField.text = p.vrPlayAreaOffsetRotation.x.ToString();
         _vrPlayAreaOffsetRotationYInputField.text = p.vrPlayAreaOffsetRotation.y.ToString();
         _vrPlayAreaOffsetRotationZInputField.text = p.vrPlayAreaOffsetRotation.z.ToString();
+        _boneVrmPath = p.boneVrmPath;
 
         int i = 0;
         foreach (var item in _videoDeviceList.options) {
@@ -549,7 +557,24 @@ public class MainCaera : MonoBehaviour {
             i++;
         }
 
+        i = 0;
+        foreach (var item in _joypadDeviceList.options)
+        {
+            if (item.text == p.joypadDeviceName)
+            {
+                _joypadDeviceList.value = i;
+                _joypadDeviceName = p.joypadDeviceName;
+                break;
+            }
+            i++;
+        }
+
         refreshUI();
+
+        if (File.Exists(_boneVrmPath))
+        {
+            loadVRMModel(_boneVrmPath);
+        }
     }
 
     void refreshUI() {

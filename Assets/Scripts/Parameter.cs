@@ -31,4 +31,6 @@ public class Parameter {
     public int port;
     public Vector3 vrPlayAreaOffsetTranslation;
     public Vector3 vrPlayAreaOffsetRotation;
+    public string boneVrmPath;
+    public string joypadDeviceName;
 }
