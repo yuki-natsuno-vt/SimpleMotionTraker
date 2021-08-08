@@ -39,6 +39,7 @@ public class HeadTrackerSender : MonoBehaviour {
     public GameObject _leftIris;
     public GameObject _rightIris;
 
+    public bool _useFaceTracking = false;
     public bool _useEyeTracking = false;
     public bool _useEyesBlink = false;
 
@@ -65,7 +66,7 @@ public class HeadTrackerSender : MonoBehaviour {
             return;
         }
 
-        if (_object != null) {
+        if (_object != null && _useFaceTracking) {
             string name = null;
             switch (DeviceMode) {
                 case VirtualDevice.HMD:

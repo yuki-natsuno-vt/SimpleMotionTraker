@@ -176,6 +176,7 @@ public class MainCaera : MonoBehaviour {
     public void OnUseFaceTracking() {
         _useFaceTracking = _useFaceTrackingToggle.isOn;
         SMT.setUseFaceTracking(_useFaceTracking);
+        _head.GetComponent<HeadTrackerSender>()._useFaceTracking = _useFaceTracking;
     }
 
     public void OnChangeForceTPose() {
@@ -284,6 +285,8 @@ public class MainCaera : MonoBehaviour {
     public void OnChangeUseHandTracking() {
         _useHandTracking = _useHandTrackingToggle.isOn;
         SMT.setUseHandTracking(_useHandTracking);
+        _leftHand.GetComponent<TrackerSender>()._isEnabled = _useHandTracking;
+        _rightHand.GetComponent<TrackerSender>()._isEnabled = _useHandTracking;
     }
 
     public void OnChangeHandMovingThresholdMin() {

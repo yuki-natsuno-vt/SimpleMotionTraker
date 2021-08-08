@@ -356,28 +356,9 @@ public class FingerController : MonoBehaviour
                 }
             }
 
-            //BlendShape
-            if (blendShapeProxy != null)
-            {
-                foreach (var b in blendShapeProxy.GetValues())
-                {
-                    uClient.Send("/VMC/Ext/Blend/Val",
-                        b.Key.ToString(),
-                        (float)b.Value
-                        );
-                }
-                uClient.Send("/VMC/Ext/Blend/Apply");
-            }
-
             //Available
             uClient.Send("/VMC/Ext/OK", 1);
         }
-        else
-        {
-            uClient.Send("/VMC/Ext/OK", 0);
-        }
-        uClient.Send("/VMC/Ext/T", Time.time);
-
     }
 
     void UpdateModelBones()

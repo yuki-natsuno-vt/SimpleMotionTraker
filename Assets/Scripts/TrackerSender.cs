@@ -38,6 +38,8 @@ public class TrackerSender : MonoBehaviour {
     public Vector3 _vrPlayAreaOffsetTranslation;
     public Vector3 _vrPlayAreaOffsetRotation;
 
+    public bool _isEnabled = false;
+
     public void ChangePort(int port) {
         if (client == null) {
             return;
@@ -65,7 +67,7 @@ public class TrackerSender : MonoBehaviour {
             return;
         }
 
-        if (_object != null) {
+        if (_object != null && _isEnabled) {
             string name = null;
             switch (DeviceMode) {
                 case VirtualDevice.HMD:
