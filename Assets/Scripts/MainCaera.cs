@@ -697,6 +697,8 @@ public class MainCaera : MonoBehaviour {
     // Use this for initialization
     void Start()
     {
+        Application.targetFrameRate = 60; // FPS
+
         WebCamDevice[] webCamDevice;
         webCamDevice = WebCamTexture.devices;
         for (int i = 0; i < webCamDevice.Length; i++) {
