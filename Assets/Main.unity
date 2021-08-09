@@ -10587,7 +10587,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 892950336}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.52240145
+  m_Size: 0.49228284
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -12166,6 +12166,7 @@ MonoBehaviour:
   _lookAt: {fileID: 225331633}
   _leftIris: {fileID: 2059940499}
   _rightIris: {fileID: 1645797283}
+  _useFaceTracking: 0
   _useEyeTracking: 0
   _useEyesBlink: 0
   _vrPlayAreaOffsetTranslation: {x: 0, y: 0, z: 0}
@@ -12734,6 +12735,7 @@ MonoBehaviour:
   _lookAt: {fileID: 0}
   _vrPlayAreaOffsetTranslation: {x: 0, y: 0, z: 0}
   _vrPlayAreaOffsetRotation: {x: 0, y: 0, z: 0}
+  _isEnabled: 0
 --- !u!114 &1165674783
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13282,6 +13284,7 @@ MonoBehaviour:
   _lookAt: {fileID: 0}
   _vrPlayAreaOffsetTranslation: {x: 0, y: 0, z: 0}
   _vrPlayAreaOffsetRotation: {x: 0, y: 0, z: 0}
+  _isEnabled: 0
 --- !u!114 &1228002565
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17620,17 +17623,6 @@ MonoBehaviour:
   Model: {fileID: 0}
   _useFingerControl: 0
   _useGripPoses: 0
-  _rate:
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
   _debugDisable: 0
 --- !u!114 &1665725140
 MonoBehaviour:
@@ -20892,7 +20884,7 @@ MonoBehaviour:
   m_Value: 0
   m_Options:
     m_Options:
-    - m_Text: Select Video Device
+    - m_Text: Select Joypad Device
       m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:
@@ -21015,7 +21007,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Select Video Device
+  m_Text: Select Joypad Device
 --- !u!222 &1934863046
 CanvasRenderer:
   m_ObjectHideFlags: 0
