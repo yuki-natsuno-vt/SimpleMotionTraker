@@ -35,7 +35,17 @@
       <div class="indent">
         <h6>・<a class="pink-text text-darken-3" href="#merit">メリット</a></h6>
         <h6>・<a class="pink-text text-darken-3" href="#getstart">すぐに始める</a></h6>
-        <h6>・<a class="pink-text text-darken-3" href="#detail">画面詳細</a></h6>
+        <h6>・<a class="pink-text text-darken-3" href="#detail">パラメータ詳細</a></h6>
+        <h6>・<a class="pink-text text-darken-3" href="#reverse_lookup">逆引きリファレンス</a></h6>
+        <div class="indent">
+          <h6>・<a class="pink-text text-darken-3" href="#save_and_load">設定の保存と読み込み</a></h6>
+          <h6>・<a class="pink-text text-darken-3" href="#select_camera">カメラの選択と起動</a></h6>
+          <h6>・<a class="pink-text text-darken-3" href="#face_pos_dir">顏の位置と向き</a></h6>
+          <h6>・<a class="pink-text text-darken-3" href="#eye_lookat_and_blink">視線とまばたき</a></h6>
+          <h6>・<a class="pink-text text-darken-3" href="#hand_tracking">簡易的な手の位置</a></h6>
+          <h6>・<a class="pink-text text-darken-3" href="#finger_control">入力機器での指の曲げ伸ばし</a></h6>
+          <h6>・<a class="pink-text text-darken-3" href="#finger_control_bind">入力機器と指の紐づけ(キーバインド)</a></h6>
+        </div>
       </div>
     </div>
   </div>
@@ -46,7 +56,7 @@
     <div class="indent">
       <p>Simple Motion Tracker（以後SMT）を使うメリットは、バーチャルモーションキャプチャー（以後VMC）とVMCの周辺ツールの恩恵を受けられることです。</p>
       <p>すでにVR機器でVMCやEVMC4Uを使いリッチな絵作りをされている方は、VR機器をSMTに置き換えるだけでクオリティを維持しつつWebカメラでの気軽な撮影や配信が可能になります。</p>
-      <p>始めてVMCを利用される方は、SMTを使いVMCでの撮影や配信環境を整えておくことで、将来的にVR機器導入した際には、SMTをVR機器に置き換えるだけで移行が行えます。</p>
+      <p>初めてVMCを利用される方は、SMTを使いVMCでの撮影や配信環境を整えておくことで、将来的にVR機器導入した際には、SMTをVR機器に置き換えるだけで移行が行えます。</p>
     </div>
   </div>
   <br>
@@ -62,7 +72,7 @@
       <h6>２．Simple Motion Trakerの起動と設定</h6>
       <div class="indent">
         <img class="responsive-img" src="img/manual002.png">
-        <p>①<strong class="blue-grey lighten-4">ドロップダウンメニュー</strong>からカメラを選択する（※既知の不具合、仮想カメラがあると異なるカメラが選ばれることがある）</p>
+        <p>①<strong class="blue-grey lighten-4">ドロップダウンメニュー</strong>からカメラを選択する<strong class="red-text">（※既知の不具合、仮想カメラがあると異なるカメラが選ばれることがある）</strong></p>
         <p>②<strong class="blue-grey lighten-4">Start</strong>を押す（カメラが起動したか確認したい場合は画面下部の Show Capture Imageにチェックを入れる）</p>
         <p>③<strong class="blue-grey lighten-4">Use Face Tracking</strong>にチェックを入れる</p>
         <p>④<strong class="blue-grey lighten-4">Calibrate Face Points</strong>を押す</p>
@@ -121,11 +131,6 @@
         <h7>Use Face Tracking</h7>
         <div class="indent">
           顏認識による追跡モードを有効にします
-        </div>
-        <br>
-        <h7>Face Angle Base Distance</h7>
-        <div class="indent">
-          真横を向いたと判定されるまでの距離です。（単位はメートル、デフォルトは0.2）
         </div>
         <br>
         <h7>Translation Magnification</h7>
@@ -215,17 +220,6 @@
           検出誤差を抑えるために指定フレーム間の平均値を取ります。値が小さいとクイックに反応しますが、ブレが大きくなります。値が大きいとブレは少ないですが反応が遅くなります。（デフォルトは10）
         </div>
         <br>
-        <h7>Auto Adjustment</h7>
-        <div class="indent">
-          Calibrate Face Pointsで行った顏の中央位置を、現在の顏の位置に徐々に補正する割合を指定します。（自動で正面を向き直す）<br>
-          値は0.0～1.0の間で指定してください。0を指定すると無効になります。（デフォルトは0.05）
-        </div>
-        <br>
-        <h7>AA Delay（Auto Adjustment Delay）</h7>
-        <div class="indent">
-          Auto Adjustmentが発動するまでの時間を設定することが出来ます。単位は秒です。(少数指定可能)
-        </div>
-        <br>
         <h7>Select Video Device</h7>
         <div class="indent">
           カメラの選択です。カメラを変更すると動いていたカメラが停止します<br>
@@ -262,13 +256,154 @@
           VR機器のプレイエリアとSMTの座標を合わせるための平行移動、回転のオフセットです。<br>
           位置を合わせることでVR機器とSMTの混成が可能になります。(頭はSMT、手はVRコントローラーなど)<br>
         </div>
+        <br>
+        <h7>Load Bone VRM</h7>
+        <div class="indent">
+          指をコントロールする際にVMCに読み込んだアバターと同じボーン構造のVRMを読み込みます。<br>
+          読み込みが完了すると Status: に "VRM is loaded" と表示されます。<br>
+          読み込んだ状態でSMTの設定ファイルを保存しておくと、次回設定ファイルを読み込んだ際にVRMが自動的にロードされます。<br>
+        </div>
+        <br>
+        <h7>Use Finger Control With Input Devises</h7>
+        <div class="indent">
+          キーボード、マウス、ジョイパッド(ゲームパッド) の入力により指の曲げ伸ばしを制御します。<br>
+        </div>
+        <br>
+        <h7>Use Grip Poses</h7>
+        <div class="indent">
+          デフォルトポーズとは別に、ジョイパッドなどを握り込んだようなポーズを取らせる事ができます。<br>
+        </div>
+        <br>
+        <h7>Select Joypad Device</h7>
+        <div class="indent">
+          ジョイパッド(ゲームパッド)を選択します。<br>
+          切り替えを適用するには "Use Finger Control With Input Devises" のチェックを一度OFFにして再度ONにする必要があります。<br>
+          <strong class="red-text">※Ver0.5 では DirectInput に対応したデバイスのみ認識します。</strong><br>
+        </div>
       </div>
       <br>
     </div>
   </div>
+  <br>
+  <br>
+  <div class="container">
+    <h5 id="reverse_lookup">逆引きリファレンス</h5>
+    <div class="indent">
+      <h6 id="save_and_load">設定の保存と読み込み</h6>
+      <div class="indent">
+        チェックボックスのON/OFFや設定した数値、カメラやジョイパッドの選択情報をファイルに保存することができます。<br>
+        <strong class="red-text">※ファイルパスに全角文字が含まれていると正常に読み込めない場合があります。</strong><br>
+        <img class="responsive-img" src="img/save_and_load_000.png">
+      </div>
+      <br>
+      <h6 id="select_camera">カメラの選択と起動</h6>
+      <div class="indent">
+        利用したいカメラを選択します。<br>
+        <strong class="red-text">※既知の不具合、利用したいカメラより上に仮想カメラが表示されている場合、仮想カメラの数だけ選択位置がずれて想定外のカメラが起動される場合があります。<br>
+        以下の画像の例では「Logicool HD Webcam」を起動するには「FaceRig Virtual」を選択する必要があります。<br></strong>
+        カメラ選択後にStartボタンを押すとカメラが起動します<br>
+        <img class="responsive-img" src="img/select_camera_000.png"><br>
+        カメラが正常に起動できているか確認します。Show Capture ImageのチェックをONにすると、別ウインドウでカメラの映像が表示されます。<br>
+        <img class="responsive-img" src="img/select_camera_001.png">
+      </div>
+      <br>
+      <h6 id="face_pos_dir">顏の位置と向き</h6>
+      <div class="indent">
+        カメラを起動した後に Use Face Tracking をONにすると顏のトラキングが開始されます。<br>
+        顏の基準位置を設定するために Calibrate Face Position ボタンを押します。<br>
+        <img class="responsive-img" src="img/face_pos_dir_000.png"><br>
+        Translation Magnification(TM)とRotation Magnification(RM)は移動と回転で実際の動きに対して倍率をかけることができます。<br>
+        例えばTMのALLに2倍を設定すると、上下左右前後に大きくアバターが動きます。<br>
+        またRMのX,Yに2倍を設定すると上下左右の顏の向きが大きくなります。<br>
+      </div>
+      <br>
+      <h6 id="eye_lookat_and_blink">視線とまばたき</h6>
+      <div class="indent">
+        <p>①Use Eye Tracking をONで視線の動き、②Use Blink をONでまばたきのトラッキングが行われます。<br>
+        カメラのキャプチャ映像で瞳に赤い〇が表示されていれば視線のトラッキングが行われています。<br>
+        もし赤い丸が瞳に対して大きすぎる場合は③Iris Thresholdの値を小さくしてください。逆に小さすぎる場合は値を大きくしてください。（おおよそ20～60が適正範囲です）<br>
+        正面を向いているのにアバターの視線が上下左右にずれる場合は④Iris OffsetでX,Yそれぞれの方向に-1～1の範囲で調整をかけることができます。<br>
+        アバターの視線の動く量を調節したい場合は⑤Iris Translation Magnification の倍率を調整してください。X,Y方向を個別に指定することが出来ます。</p>
+        <p>まぶたの開閉がうまく認識されない場合は⑥Eye Open Thresholdで全閉じ、全開きの閾値を設定することができます。<br>
+        目を開いているのにアバターの半目になってしまう場合は最大値の値を下げてください。<br>
+        逆に目を閉じているのにアバターの半目になってしまう場合は最小値の値を上げてください。</p>
+        <img class="responsive-img" src="img/eye_lookat_and_blink_000.png"><br>
+      </div>
+      <br>
+      <h6 id="hand_tracking">簡易的な手の位置</h6>
+      <div class="indent">
+        <p>①Use Hnad TrackingをONにすると手のトラッキングが行われます。<br>
+        カメラのキャプチャ映像で手の動きに合わせて緑の〇が表示されていれば手のトラッキングが行われています。<br>
+        手を動かしても緑の〇が出ない場合は②Hand Moving Thresholdの最大値を下げてください。</p>
+        <p>手をカメラの範囲外にだすなど、SMTが手を追跡できなくなった場合には自動的に手を下げます。<br>
+        手を下げるまでの時間は③Hand Undetected Durationで指定することができます。</p>
+        <p>手の位置は顏の位置を元に計算されます。表示位置をずらしたい場合は④Hand OffsetでX,Y,Zそれぞれの軸に対して調整することができます。</p>
+        <p>カメラの撮影範囲が狭い場合や、実際の手の動きとアバターの動き(腕の伸びなど)が一致しない場合などで、手の移動量を調整したい場合は⑤Hand Translation MagnificationでX,Y,Zそれぞの軸に対して倍率を設定することができます。</p>
+        <img class="responsive-img" src="img/hand_tracking_000.png"><br>
+      </div>
+      <br>
+      <h6 id="finger_control">入力機器での指の曲げ伸ばし</h6>
+      <div class="indent">
+        <p>入力デバイスによる指の曲げ伸ばしを行うにはVMCに以下の設定が必要です。<br>
+        VMCの詳細設定にある "OSCモーション受信を有効にする" と "手ボーン取得" をONにします。<br>
+        <img class="responsive-img" src="img/finger_control_001.png"></p>
+        <p>SMT側では Load Bone VRM ボタンを押してVMCに読み込んでいるVRMと同じボーンを持つVRMを読み込みます。<br>
+        読み込みに成功した場合 Status: の所に VRM is loaded. と表示されます。<br>
+        <img class="responsive-img" src="img/finger_control_000.png"></p>
+        <p>Use Finger Control With Input Devises をONにすると、入力でデバイスのキーやボタン押下に合わせてアバターの指が動きます。<br>
+        Select Joypad Device で有効なジョイパッド(ゲームパッド)を選ぶことが出来ます。(Ver0.5ではDirectInputに対応したデバイスのみ動作します)<br>
+        デバイスの変更は Use Finger Control With Input Devisesを OFF/ONすることで適用されます。<br>
+        Use Grip PosesをONにするとジョイパッドを握り込んだようなポーズを取らせることができます。</p>
+      </div>
+      <br>
+      <h6 id="finger_control_bind">入力機器と指の紐づけ(キーバインド)</h6>
+      <div class="indent">
+        <p>入力機器での指の曲げ伸ばしでは、設定ファイルによりキーやボタンと指の紐づけを調整することができます。<br>
+        設定ファイルは以下の場所に配置されています。<br>
+        ※メモ帳などテキストエディタで開き編集してください。</p>
+        <div class="indent">
+          <a href="https://github.com/yuki-natsuno-vt/SimpleMotionTraker/blob/4032d10d15853faf40db54c6995770489c098d1b/Assets/StreamingAssets/finger_control_config.json">
+          SimpleMotionTracker_Data/StreamingAssets/finger_control_config.json
+          </a>(※このリンク先はGitHubです)
+        </div>
+        <p>motionSpeed は 指の曲げ伸ばしスピードの設定です。</p>
+        <p>バインドには5つのグループがあります。
+        <div class="indent">
+          <h7>
+          defaultPoses：標準ポーズ。何もボタンを押していない状態。<br>
+          gripPoses：握りポーズ。何もボタンを押していない状態。<br>
+          joypad：ジョイパッドのボタンバインド。<br>
+          keyboard：キーボードのキーバインド。<br>
+          mouse：マウスのボタンバインド。<br>
+          </7>
+        </div>
+        </p>
+        <p>キーバインド設定のパラメータは以下のようになっています。<br>
+        <img class="responsive-img" src="img/finger_control_bind_000.png"></p>
+        <p>①code は、キーまたはボタンに割り当てられた固有の名前です。
+        <a href="https://github.com/yuki-natsuno-vt/SimpleMotionTraker/blob/4032d10d15853faf40db54c6995770489c098d1b/Assets/Scripts/ynv/Joypad.cs">
+        ジョイパッド</a>、
+        <a href="https://github.com/yuki-natsuno-vt/SimpleMotionTraker/blob/4032d10d15853faf40db54c6995770489c098d1b/Assets/Scripts/ynv/KeyCode.cs">
+        キーボード</a>、
+        <a href="https://github.com/yuki-natsuno-vt/SimpleMotionTraker/blob/4032d10d15853faf40db54c6995770489c098d1b/Assets/Scripts/ynv/MouseCode.cs">
+        マウス</a> 
+        それぞれのボタンにコードが割り当てられています。<br>
+        ※コード名はリンク先で確認してください。</p>
+        <p>②rate は指の曲げ率です。0.0が開いている状態、1.0が握っている状態です。</p>
+        <p>③finger は指の指定です。R0～R4が右手親指～右手小指、L0～L4が左手親指～左手小指となります。</p>
+        <p>キーバインドでは1つのキー、ボタンで、複数の指を同時に制御することができます。<br>
+        設定を変更、保存したあと、SMTで読み込むには Use Finger Control With Input Devises をOFF/ONしてください。</p>
+        <p><strong class="red-text">注意点<br>
+        各グループの最後の行は、行末にカンマを付けてはいけません。設定ファイルが正常に読み込めなくなります。<br>
+        <img class="responsive-img" src="img/finger_control_bind_001.png"></strong></p>
+        <p>ジョイパッドとキーバインドとデバイスの改造でデータグローブの様な使い方も可能になります。<br>
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/TPaUZQGK2Bs" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></p>
+      </div>
+    </div>
+  </div>
+  <br>
+  <br>
   
-  <br>
-  <br>
   <footer class="page-footer pink darken-3">
     <div class="container">
       <div class="row">
