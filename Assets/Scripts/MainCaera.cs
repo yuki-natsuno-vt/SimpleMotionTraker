@@ -20,7 +20,7 @@ public class MainCaera : MonoBehaviour {
 
     [SerializeField] Toggle _forceTPoseToggle;
     [SerializeField] Toggle _useFaceTrackingToggle;
-    [SerializeField] InputField _faceAngleBaseDistanceInputField;
+    [SerializeField] InputField _faceAngleBaseDistanceInputField; // remove
     [SerializeField] InputField _translationMagnificationInputField;
     [SerializeField] InputField _translationMagnificationXInputField;
     [SerializeField] InputField _translationMagnificationYInputField;
@@ -53,8 +53,8 @@ public class MainCaera : MonoBehaviour {
     [SerializeField] InputField _handTranslationMagnificationZInputField;
 
     [SerializeField] InputField _smoothingLevelInputField;
-    [SerializeField] InputField _autoAdjustmentInputField;
-    [SerializeField] InputField _autoAdjustmentDelayInputField;
+    [SerializeField] InputField _autoAdjustmentInputField; // remove
+    [SerializeField] InputField _autoAdjustmentDelayInputField; // remove
 
     [SerializeField] Dropdown _videoDeviceList;
     [SerializeField] Text _selectedVideoDeviceName;
@@ -84,7 +84,7 @@ public class MainCaera : MonoBehaviour {
     bool _useARMarker = false;
     bool _useFaceTracking = false;
 
-    float _faceAngleBaseDistance = 0.20f;
+    float _faceAngleBaseDistance = 0.20f; // remove
     float _translationMagnification = 1.0f;
     Vector3 _translationMagnifications = Vector3.one;
     float _rotationMagnification = 1.0f;
@@ -142,9 +142,9 @@ public class MainCaera : MonoBehaviour {
     List<Vector3> _facePositionList;
     List<Vector3> _faceRotationList;
 
-    float _autoAdjustmentRatio = 0.0f;
-    float _autoAdjustmentDelay = 0.0f;
-    float _autoAdjustmentDelayStartTime = 0;
+    float _autoAdjustmentRatio = 0.0f; // remove
+    float _autoAdjustmentDelay = 0.0f; // remove
+    float _autoAdjustmentDelayStartTime = 0; // remove
 
     string _deviceName;
     float _mirror = 1;
@@ -184,7 +184,7 @@ public class MainCaera : MonoBehaviour {
     }
 
     public void OnChangeFaceAngleBaseDistance() {
-        _faceAngleBaseDistance = float.Parse(_faceAngleBaseDistanceInputField.text);
+        _faceAngleBaseDistance = float.Parse(_faceAngleBaseDistanceInputField.text); // remove
     }
 
     public void OnChangeTranslationMagnification() {
@@ -332,16 +332,16 @@ public class MainCaera : MonoBehaviour {
     }
     
     public void OnChangeAutoAdjustment() {
-        _autoAdjustmentRatio = Mathf.Clamp(float.Parse(_autoAdjustmentInputField.text), 0, 1.0f);
-        _autoAdjustmentInputField.text = _autoAdjustmentRatio.ToString();
+        _autoAdjustmentRatio = Mathf.Clamp(float.Parse(_autoAdjustmentInputField.text), 0, 1.0f); // remove
+        _autoAdjustmentInputField.text = _autoAdjustmentRatio.ToString(); // remove
     }
 
     public void OnChangeAutoAdjustmentDelay() {
-        _autoAdjustmentDelay = float.Parse(_autoAdjustmentDelayInputField.text);
-        if (_autoAdjustmentDelay < 0) {
-            _autoAdjustmentDelay = 0;
+        _autoAdjustmentDelay = float.Parse(_autoAdjustmentDelayInputField.text); // remove
+        if (_autoAdjustmentDelay < 0) { // remove
+            _autoAdjustmentDelay = 0; // remove
         }
-        _autoAdjustmentDelayInputField.text = _autoAdjustmentDelay.ToString();
+        _autoAdjustmentDelayInputField.text = _autoAdjustmentDelay.ToString(); // remove
     }
 
     public void OnChangeVideoDeviceList() {
@@ -464,7 +464,7 @@ public class MainCaera : MonoBehaviour {
         p.isForcedTPose = _isForcedTPose;
         //p.useARMarker = _useARMarker;
         p.useFaceTracking = _useFaceTracking;
-        p.faceAngleBaseDistance = _faceAngleBaseDistance;
+        p.faceAngleBaseDistance = _faceAngleBaseDistance; // remove
         p.translationMagnification = _translationMagnification;
         p.translationMagnifications = _translationMagnifications;
         p.rotationMagnification = _rotationMagnification;
@@ -484,8 +484,8 @@ public class MainCaera : MonoBehaviour {
         p.handOffset = _handOffset;
         p.handTranslationMagnifications = _handTranslationMagnifications;
         p.smoothingLevel = _smoothingLevel;
-        p.autoAdjustmentRatio = _autoAdjustmentRatio;
-        p.autoAdjustmentDelay = _autoAdjustmentDelay;
+        p.autoAdjustmentRatio = _autoAdjustmentRatio; // remove
+        p.autoAdjustmentDelay = _autoAdjustmentDelay; // remove
         p.mirror = _mirror;
         p.port = _port;
         p.vrPlayAreaOffsetTranslation = _vrPlayAreaOffsetTranslation;
@@ -508,7 +508,7 @@ public class MainCaera : MonoBehaviour {
         _forceTPoseToggle.isOn = p.isForcedTPose;
         // = p.useARMarker;
         _useFaceTrackingToggle.isOn = p.useFaceTracking;
-        _faceAngleBaseDistanceInputField.text = p.faceAngleBaseDistance.ToString();
+        _faceAngleBaseDistanceInputField.text = p.faceAngleBaseDistance.ToString(); // remove
         _translationMagnificationInputField.text = p.translationMagnification.ToString();
         _translationMagnificationXInputField.text = p.translationMagnifications.x.ToString();
         _translationMagnificationYInputField.text = p.translationMagnifications.y.ToString();
@@ -538,8 +538,8 @@ public class MainCaera : MonoBehaviour {
         _handTranslationMagnificationYInputField.text = p.handTranslationMagnifications.y.ToString();
         _handTranslationMagnificationZInputField.text = p.handTranslationMagnifications.z.ToString();
         _smoothingLevelInputField.text = p.smoothingLevel.ToString();
-        _autoAdjustmentInputField.text = p.autoAdjustmentRatio.ToString();
-        _autoAdjustmentDelayInputField.text = p.autoAdjustmentDelay.ToString();
+        _autoAdjustmentInputField.text = p.autoAdjustmentRatio.ToString(); // remove
+        _autoAdjustmentDelayInputField.text = p.autoAdjustmentDelay.ToString(); // remove
         _mirrorToggle.isOn = (p.mirror == -1);
         _uOSCInputField.text = p.port.ToString();
         _vrPlayAreaOffsetTranslationXInputField.text = p.vrPlayAreaOffsetTranslation.x.ToString();
@@ -725,7 +725,7 @@ public class MainCaera : MonoBehaviour {
 
         _forceTPoseToggle.isOn = false;
         _useFaceTrackingToggle.isOn = false;
-        _faceAngleBaseDistanceInputField.text = "0.2";
+        _faceAngleBaseDistanceInputField.text = "0.2"; // remove
         _translationMagnificationInputField.text = "1.0";
         _translationMagnificationXInputField.text = "1.0";
         _translationMagnificationYInputField.text = "1.0";
@@ -761,9 +761,9 @@ public class MainCaera : MonoBehaviour {
 
         _smoothingLevelInputField.text = "5";
 
-        _autoAdjustmentInputField.text = "0.05";
-        _autoAdjustmentDelayInputField.text = "0.5";
-        _autoAdjustmentDelayStartTime = Time.time;
+        _autoAdjustmentInputField.text = "0.05"; // remove
+        _autoAdjustmentDelayInputField.text = "0.5"; // remove
+        _autoAdjustmentDelayStartTime = Time.time; // remove
         _mirrorToggle.isOn = false;
 
         _uOSCInputField.text = "39540";
@@ -1039,22 +1039,23 @@ public class MainCaera : MonoBehaviour {
                 _head.transform.rotation = faceRotation;
             }
 
-            // 顏の中央位置を自動調整
-            if (_autoAdjustmentRatio > 0) {
-                // 一定角度内は常に調整、角度が大きい場合はDelayだけ待ってから調整開始
-                bool isNarrowAngle = (Mathf.Abs(faceRotationEuler.x) < 5 && Mathf.Abs(faceRotationEuler.y) < 5);
-                bool isExceededWaitingTime = ((Time.time - _autoAdjustmentDelayStartTime) > _autoAdjustmentDelay);
-                if (isNarrowAngle || isExceededWaitingTime) {
-                    var z = _calibratedFacePosition.z; // Zは維持、XYのみずれやすいので調整する
-                    _calibratedFacePosition = (_calibratedFacePosition * (1.0f - _autoAdjustmentRatio)) + (face * _autoAdjustmentRatio);
-                    _calibratedFacePosition.z = z;
-                }
-
-                // 正面を向いた時にオートアジャストの発動カウントをリセット
-                if (isNarrowAngle) {
-                    _autoAdjustmentDelayStartTime = Time.time;
-                }
-            }
+            // remove
+            //// 顏の中央位置を自動調整
+            //if (_autoAdjustmentRatio > 0) {
+            //    // 一定角度内は常に調整、角度が大きい場合はDelayだけ待ってから調整開始
+            //    bool isNarrowAngle = (Mathf.Abs(faceRotationEuler.x) < 5 && Mathf.Abs(faceRotationEuler.y) < 5);
+            //    bool isExceededWaitingTime = ((Time.time - _autoAdjustmentDelayStartTime) > _autoAdjustmentDelay);
+            //    if (isNarrowAngle || isExceededWaitingTime) {
+            //        var z = _calibratedFacePosition.z; // Zは維持、XYのみずれやすいので調整する
+            //        _calibratedFacePosition = (_calibratedFacePosition * (1.0f - _autoAdjustmentRatio)) + (face * _autoAdjustmentRatio);
+            //        _calibratedFacePosition.z = z;
+            //    }
+            //
+            //    // 正面を向いた時にオートアジャストの発動カウントをリセット
+            //    if (isNarrowAngle) {
+            //        _autoAdjustmentDelayStartTime = Time.time;
+            //    }
+            //}
 
 
             // アイトラキング(虹彩追跡)
