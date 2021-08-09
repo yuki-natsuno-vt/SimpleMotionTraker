@@ -46,7 +46,6 @@ ShapeDXのインポート
 ・[Dlib FaceLandmark Detector](https://assetstore.unity.com/packages/tools/integration/dlib-facelandmark-detector-64314) に含まれる sp_human_face_68_for_mobile.dat を Assets/StreamingAssets に配置  
 ## exeの出力
 Unityの File -> Build SettingsからBuildを行ってください。  
-出力したexeと同じ階層に data フォルダをコピーして配置してください。
 
 # FAQ
 Q. 無料で利用ですか？商用利用可能ですか？作者の表記は必要ですか？  
