@@ -38,12 +38,12 @@ Ver 0.1
 Assets直下に以下のパッケージをインポートしてください。  
 ・VRM([UniVRM-0.57.1_60a9.unitypackage](https://github.com/vrm-c/UniVRM/releases/tag/v0.57.1))  
 ・uOSC([uOSC-v0.0.2.unitypackage](https://github.com/hecomi/uOSC/releases/tag/v0.0.2))  
-ShapeDXのインポート
-・Assets/Script/ynv/Input.cs でエラーが出るのでVisualStudioで開く。
-・VisualStudio メニュー → ツール → NuGetパッケージマネージャ → ソリューションのNuGetパッケージの管理 → 「このソリューションに一部のNuGetパッケージが見つかりません。クリックするとオンラインパッケージソースから復元します。」の[復元]をクリック。
-・Packages/SharpDX.4.2.0 と Packages/SharpDX.DirectInput.4.2.0 内の lib/net45/*.dll を Assets/Plagins にコピーする。
-ランドマークデータの準備
-・[Dlib FaceLandmark Detector](https://assetstore.unity.com/packages/tools/integration/dlib-facelandmark-detector-64314) に含まれる sp_human_face_68_for_mobile.dat を Assets/StreamingAssets に配置
+ShapeDXのインポート  
+・Assets/Script/ynv/Input.cs でエラーが出るのでVisualStudioで開く。  
+・VisualStudio メニュー → ツール → NuGetパッケージマネージャ → ソリューションのNuGetパッケージの管理 → 「このソリューションに一部のNuGetパッケージが見つかりません。クリックするとオンラインパッケージソースから復元します。」の[復元]をクリック。  
+・Packages/SharpDX.4.2.0 と Packages/SharpDX.DirectInput.4.2.0 内の lib/net45/*.dll を Assets/Plagins にコピーする。  
+ランドマークデータの準備  
+・[Dlib FaceLandmark Detector](https://assetstore.unity.com/packages/tools/integration/dlib-facelandmark-detector-64314) に含まれる sp_human_face_68_for_mobile.dat を Assets/StreamingAssets に配置  
 ## exeの出力
 Unityの File -> Build SettingsからBuildを行ってください。  
 出力したexeと同じ階層に data フォルダをコピーして配置してください。
